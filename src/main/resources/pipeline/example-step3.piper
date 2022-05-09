@@ -1,0 +1,11 @@
+package org.apache.ctakes.pbj.cr
+
+// Getting CAS from Artemis
+reader PbjReceiver QUEUE=test/PythonToJava
+
+// Print Nice Table
+add SemanticTableFileWriter
+
+//Print HTML
+add pretty.html.HtmlTextWriter
+
