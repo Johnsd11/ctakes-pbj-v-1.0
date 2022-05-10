@@ -86,7 +86,6 @@ def process_ann(annotation, sentence):
     sig_seen = False
     indices = []
     for tag_idx, span_iter in groupby(get_partitions(annotation)):
-        print(f"IN THE LOOP : {tag_idx}")
         span_end = len(list(span_iter)) + span_begin
         # Get the span of the split sentence
         # which is aligned with the current
@@ -101,77 +100,59 @@ def process_ann(annotation, sentence):
         span_begin = span_end
     return sentence, indices
 
+def ctakes_tokens(seg):
+    return re.split(r'(\s+)', seg)
+
+def get_map(seg):
+    wordBegins  = []
+    b=0
+    for t in ctakes_tokens(seg):
+        # if ( t != whitespace ) {
+        if not t.isspace():
+            wordBegins.append( b )
+        b += len(t)
+    return wordBegins
+
 class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
 
     def __init__(self, type_system):
+        AutoConfig.register("cnlpt", CnlpConfig)
+        AutoModel.register(CnlpConfig, CnlpModelForClassification)
+
+        taggers_dict, out_model_dict = model_dicts(
+            "/home/ch231037/pipeline_models/",
+        )
         self.type_system = type_system
+        self.taggers = taggers_dict
+        self.out_pipes = out_model_dict
 
     def process_jcas(self, cas):
 
         MedMention = self.type_system.get_type(MedicationMention)
+        SigMention = self.type_system.get_type(EventMention)
 
-        AutoConfig.register("cnlpt", CnlpConfig)
-        AutoModel.register(CnlpConfig, CnlpModelForClassification)
-
-        # taggers_dict, out_model_dict = model_dicts(
-        #    "/home/ch231037/pipeline_models/",
-        # )
-
-        med_tagger = get_model("/home/ch231037/pipeline_models", 'dphe_med')
-
-        for segment in cas.select(Segment):
-            text = segment.get_covered_text()
-            seg_begin = segment.begin
+        for sentence in cas.select(Sentence):
+            text = sentence.get_covered_text()
+            seg_begin = sentence.begin
             # Only need raw sentences for inference
 
-            def ctakes_tokens(seg):
-                return re.split(r'(\s+)', seg)
-
-            #    return [token for token in cas.select_covered(WordToken, seg)]
-
-            '''
-            def get_map(string):
-                tokens_map = {}
-                for i, c_tok in enumerate(ctakes_tokens(string)):
-                    if c_tok:
-                        tokens_map[c_tok] = i
-                return tokens_map
-            '''
-            ann = med_tagger(
-                text,
-            )
-
-
-            def get_map(seg):
-                wordBegins  = []
-                b=0
-                for t in ctakes_tokens(seg):
-                # if ( t != whitespace ) {
-                    if not t.isspace():
-                        wordBegins.append( b )
-                    b += len(t)
-                return wordBegins
-
-
-# tamoxifen , 20 mg
-            # [0]
-            _, indices = process_ann(ann, text)
             print(text)
-            # print(f"indices : {indices}")
-            for a,b in indices:
-                print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
-                tok_sent = ctakes_tokens(text)
-                # tok_map = get_map(text)
-                # new_start = tok_map[ctakes_tok(text)(a)]
-                # new_end = tok_map[ctakes_tok(text)(b)]
-                word_begins = get_map(text)
-                start = word_begins[a] + seg_begin
-                end = word_begins[b] + seg_begin
-                # print(f"RELEVANT SPAN : {text[start:end]}")
+            for task_name, tagger in self.taggers.items():
 
-                print(f"token index span : {a, b}")
-                print(f"doc offsets : {start, end}")
-                print(f"segment begin idx : {seg_begin}")
-                medmention = MedMention(begin=start, end=end)
-                cas.add_annotation(medmention)
+                ann = tagger(text)
+
+                _, indices = process_ann(ann, text)
+                # print(f"indices : {indices}")
+                for a,b in indices:
+                    print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
+
+                    word_begins = get_map(cas.document_text)
+                    start = word_begins[a]
+                    end = word_begins[b] - 1
+
+                    if task_name == 'dphe_med':
+                        mention = MedMention(begin=start, end=end)
+                    else:
+                        mention = SigMention(begin=start, end=end)
+                    cas.add_annotation(mention)
 
