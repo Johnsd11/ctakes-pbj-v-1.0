@@ -1,4 +1,6 @@
 import os
+import re
+import string
 
 from cnlpt.cnlp_processors import (
     cnlp_processors,
@@ -119,25 +121,57 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
 
         for segment in cas.select(Segment):
             text = segment.get_covered_text()
-
+            seg_begin = segment.begin
             # Only need raw sentences for inference
 
+            def ctakes_tokens(seg):
+                return re.split(r'(\s+)', seg)
 
+            #    return [token for token in cas.select_covered(WordToken, seg)]
+
+            '''
+            def get_map(string):
+                tokens_map = {}
+                for i, c_tok in enumerate(ctakes_tokens(string)):
+                    if c_tok:
+                        tokens_map[c_tok] = i
+                return tokens_map
+            '''
             ann = med_tagger(
                 text,
             )
 
 
+            def get_map(seg):
+                wordBegins  = []
+                b=0
+                for t in ctakes_tokens(seg):
+                # if ( t != whitespace ) {
+                    if not t.isspace():
+                        wordBegins.append( b )
+                    b += len(t)
+                return wordBegins
+
+
+# tamoxifen , 20 mg
+            # [0]
             _, indices = process_ann(ann, text)
             print(text)
-            print(f"indices : {indices}")
+            # print(f"indices : {indices}")
             for a,b in indices:
-                print(ctakes_tok(text)[a:b])
-                begin_idx = a
-                end_idx = b
-                tok_sent = ctakes_tok(text)
-                start = len(tok_sent[0:begin_idx])
-                end = start + end_idx
+                print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
+                tok_sent = ctakes_tokens(text)
+                # tok_map = get_map(text)
+                # new_start = tok_map[ctakes_tok(text)(a)]
+                # new_end = tok_map[ctakes_tok(text)(b)]
+                word_begins = get_map(text)
+                start = word_begins[a] + seg_begin
+                end = word_begins[b] + seg_begin
+                # print(f"RELEVANT SPAN : {text[start:end]}")
+
+                print(f"token index span : {a, b}")
+                print(f"doc offsets : {start, end}")
+                print(f"segment begin idx : {seg_begin}")
                 medmention = MedMention(begin=start, end=end)
                 cas.add_annotation(medmention)
 

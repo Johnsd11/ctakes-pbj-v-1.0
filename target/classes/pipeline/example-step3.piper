@@ -9,3 +9,5 @@ add SemanticTableFileWriter
 //Print HTML
 add pretty.html.HtmlTextWriter
 
+// Print Text - new addition
+add pretty.plaintext.PrettyTextWriterFit
