@@ -114,10 +114,8 @@ def process_ann_old(annotation, sentence):
 def process_ann(annotation):
     span_begin, span_end = 0, 0
     indices = []
-    print(annotation)
     for span in re.split(r'(1{1}2+)|(1{1})', get_partitions(annotation)):
         if span is not None:
-            print(span)
         # for span in spans:
             span_end = len(span) + span_begin
             if span.startswith('1'):
@@ -153,58 +151,71 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
         self.taggers = taggers_dict
         self.out_pipes = out_model_dict
 
-    # portion since segment etc have specific
-    # meanings in cTAKES
-    def process_portion(self, cas, task_name, doc_portion, portion_ann):
+    def process_jcas(self, cas):
 
         MedMention = self.type_system.get_type(MedicationMention)
         SigMention = self.type_system.get_type(EventMention)
 
-        text = doc_portion.get_covered_text()
-        sent_begin = doc_portion.begin
-        print(text)
-        print(sent_begin)
-        for a, b in portion_ann:
-            print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
+        # sentences = [sentence for sentence in cas.select(Sentence)]
+        # sentences_text = [sentence.get_covered_text() for sentence in sentences]
+        # idx_ann_dict = {}
+        central_task = 'dphe_med'
+        for sentence in cas.select(Sentence):
+            text = sentence.get_covered_text()
+            sent_begin = sentence.begin
+            central_tagger = self.taggers[central_task]
+            central_ann = central_tagger(text)
+            central_indices = process_ann(central_ann)
+            if len(central_indices) > 0:
+                for a, b in central_indices:
+                    print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
 
-            word_begins = get_map(text)
-            print(
-                (
-                    f"word begins  : {word_begins} \n"
-                    f"token indices : {a,b} \n"
-                )
-            )
-            if a > len(word_begins) - 1:
-                ValueError(f"Frog pls {a} {word_begins}")
-            start = word_begins[a] + sent_begin
-            if b > len(word_begins) - 1:
-                # just get the last element...
-                end = len(text) + sent_begin - 1
-            else:
-                end = word_begins[b] + sent_begin - 1
+                    word_begins = get_map(text)
+                    print(
+                        (
+                            f"word begins  : {word_begins} \n"
+                            f"token indices : {a,b} \n"
+                        )
+                    )
+                    if a > len(word_begins) - 1:
+                        ValueError(f"Frog pls {a} {word_begins}")
+                    start = word_begins[a] + sent_begin
+                    if b > len(word_begins) - 1:
+                        # just get the last element...
+                        end = len(text) + sent_begin - 1
+                    else:
+                        end = word_begins[b] + sent_begin - 1
 
-            print(f"document indices {start, end}")
-            if task_name == 'dphe_med':
-                mention = MedMention(begin=start, end=end)
-            else:
-                mention = SigMention(begin=start, end=end)
-            cas.add_annotation(mention)
+                    print(f"document indices {start, end}")
+                    # know a priori this is a medication mention
+                    mention = MedMention(begin=start, end=end)
+                    cas.add_annotation(mention)
+                for task_name, sig_tagger in self.taggers.items():
+                    if task_name != central_task:
+                        sig_ann = sig_tagger(text)
+                        sig_indices = process_ann(sig_ann)
+                        for a, b in sig_indices:
+                            print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
 
-    def process_jcas(self, cas):
+                            word_begins = get_map(text)
+                            print(
+                                (
+                                    f"word begins  : {word_begins} \n"
+                                    f"token indices : {a,b} \n"
+                                )
+                            )
+                            if a > len(word_begins) - 1:
+                                ValueError(f"Frog pls {a} {word_begins}")
+                            start = word_begins[a] + sent_begin
+                            if b > len(word_begins) - 1:
+                                # just get the last element...
+                                end = len(text) + sent_begin - 1
+                            else:
+                                end = word_begins[b] + sent_begin - 1
 
-        sentences = [sentence for sentence in cas.select(Sentence)]
-        sentences_text = [sentence.get_covered_text() for sentence in sentences]
-        idx_ann_dict = {}
-
-        for task_name, tagger in self.taggers.items():
-
-            print(f"Annotating sentences for {task_name}")
-            ann_sents = tagger(sentences_text)
-            print(f"Processing annotated sentences for {task_name}")
-            idx_ann_dict[task_name] = [process_ann(ann) for ann in ann_sents]
-
-            print(f"Writing mentions discovered by {task_name} to cas")
-            for sent, indices in zip(sentences, idx_ann_dict[task_name]):
-                self.process_portion(cas, task_name, sent, indices)
+                            print(f"document indices {start, end}")
+                            # know a priori this is a sig mention
+                            mention = SigMention(begin=start, end=end)
+                            cas.add_annotation(mention)
 
 
