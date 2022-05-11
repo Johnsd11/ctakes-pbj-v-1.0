@@ -67,26 +67,36 @@ def get_model(models_dir, target_task_name):
                     task_processor=task_processor
                 )
 
+
 # Turn two annotations into a list of integers,
 # used for fast grouping of indices
 # in get_anafora_tags
 def get_partitions(axis_ann):
     def tag2idx(tag):
         if tag != 'O':
-            return 1
+            if tag.startswith('B'):
+                return 1
+            elif tag.startswith('I'):
+                return 2
         # 2 identifies the second
         else:
             return 0
-    return map(tag2idx, axis_ann)
+    index_tagged = map(tag2idx, axis_ann)
+    return "".join([str(idx) for idx in index_tagged])
 
-def process_ann(annotation, sentence):
+'''
+def process_ann_old(annotation, sentence):
     span_begin = 0
     annotated_list = []
     split_sent = ctakes_tok(sentence)
     sig_seen = False
     indices = []
+    curr_span_begin = 0
+    curr_span_end = 0
     for tag_idx, span_iter in groupby(get_partitions(annotation)):
         span_end = len(list(span_iter)) + span_begin
+        if span_end > 0:
+            span_end = span_end - 1
         # Get the span of the split sentence
         # which is aligned with the current
         # span of the same integer
@@ -99,19 +109,36 @@ def process_ann(annotation, sentence):
         # annotated_list.extend(ann_span)
         span_begin = span_end
     return sentence, indices
+'''
+
+def process_ann(annotation):
+    span_begin, span_end = 0, 0
+    indices = []
+    print(annotation)
+    for span in re.split(r'(1{1}2+)|(1{1})', get_partitions(annotation)):
+        if span is not None:
+            print(span)
+        # for span in spans:
+            span_end = len(span) + span_begin
+            if span.startswith('1'):
+                indices.append((span_begin, span_end))
+            span_begin = span_end
+    return indices
+
 
 def ctakes_tokens(seg):
     return re.split(r'(\s+)', seg)
 
+
 def get_map(seg):
-    wordBegins  = []
-    b=0
+    word_begins = []
+    b = 0
     for t in ctakes_tokens(seg):
-        # if ( t != whitespace ) {
         if not t.isspace():
-            wordBegins.append( b )
+            word_begins.append(b)
         b += len(t)
-    return wordBegins
+    return word_begins
+
 
 class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
 
@@ -126,33 +153,58 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
         self.taggers = taggers_dict
         self.out_pipes = out_model_dict
 
-    def process_jcas(self, cas):
+    # portion since segment etc have specific
+    # meanings in cTAKES
+    def process_portion(self, cas, task_name, doc_portion, portion_ann):
 
         MedMention = self.type_system.get_type(MedicationMention)
         SigMention = self.type_system.get_type(EventMention)
 
-        for sentence in cas.select(Sentence):
-            text = sentence.get_covered_text()
-            seg_begin = sentence.begin
-            # Only need raw sentences for inference
+        text = doc_portion.get_covered_text()
+        sent_begin = doc_portion.begin
+        print(text)
+        print(sent_begin)
+        for a, b in portion_ann:
+            print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
 
-            print(text)
-            for task_name, tagger in self.taggers.items():
+            word_begins = get_map(text)
+            print(
+                (
+                    f"word begins  : {word_begins} \n"
+                    f"token indices : {a,b} \n"
+                )
+            )
+            if a > len(word_begins) - 1:
+                ValueError(f"Frog pls {a} {word_begins}")
+            start = word_begins[a] + sent_begin
+            if b > len(word_begins) - 1:
+                # just get the last element...
+                end = len(text) + sent_begin - 1
+            else:
+                end = word_begins[b] + sent_begin - 1
 
-                ann = tagger(text)
+            print(f"document indices {start, end}")
+            if task_name == 'dphe_med':
+                mention = MedMention(begin=start, end=end)
+            else:
+                mention = SigMention(begin=start, end=end)
+            cas.add_annotation(mention)
 
-                _, indices = process_ann(ann, text)
-                # print(f"indices : {indices}")
-                for a,b in indices:
-                    print(f"Candidate Tokens {ctakes_tok(text)[a:b]}")
+    def process_jcas(self, cas):
 
-                    word_begins = get_map(cas.document_text)
-                    start = word_begins[a]
-                    end = word_begins[b] - 1
+        sentences = [sentence for sentence in cas.select(Sentence)]
+        sentences_text = [sentence.get_covered_text() for sentence in sentences]
+        idx_ann_dict = {}
 
-                    if task_name == 'dphe_med':
-                        mention = MedMention(begin=start, end=end)
-                    else:
-                        mention = SigMention(begin=start, end=end)
-                    cas.add_annotation(mention)
+        for task_name, tagger in self.taggers.items():
+
+            print(f"Annotating sentences for {task_name}")
+            ann_sents = tagger(sentences_text)
+            print(f"Processing annotated sentences for {task_name}")
+            idx_ann_dict[task_name] = [process_ann(ann) for ann in ann_sents]
+
+            print(f"Writing mentions discovered by {task_name} to cas")
+            for sent, indices in zip(sentences, idx_ann_dict[task_name]):
+                self.process_portion(cas, task_name, sent, indices)
+
 
