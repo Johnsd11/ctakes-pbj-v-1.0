@@ -11,8 +11,15 @@ STOP_MESSAGE = "Your Friendly neighborhood stop message. Just so that this never
 class TypeSystemAccessor:
 
     def __init__(self, type_system_file=CTAKES_TYPE_SYSTEM):
-        with open(type_system_file, 'rb') as f:
-            self.typesystem = cassis.load_typesystem(f)
+        print("loading typesystem")
+        self.typesystem = 0
+        self.type_system_file = type_system_file
 
-    def getTypeSystem(self):
+    def load_type_system(self):
+        print("done loading")
+        with open(self.type_system_file, 'rb') as f:
+            self.typesystem = cassis.load_typesystem(f)
+        print("is this the error")
+
+    def get_type_system(self):
         return self.typesystem

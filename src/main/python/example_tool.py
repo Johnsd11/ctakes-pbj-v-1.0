@@ -1,7 +1,6 @@
 # Should accept cmd line parameters such as: hostname, port, queue name for recieving cas, and queue name for
 # sending cas
 
-import sys
 from process_wrapper.jcas_sentence_printer import *
 # These are the lines that ignore the typesystem errors
 import warnings
@@ -22,12 +21,6 @@ def main():
     print(port)
     print(queue_receive_cas)
     print(queue_send_cas)
-    # start the receiver
-    # receiver(queue_receive_cas)
-    # once a cas has been received we should start a sender to send the cas
-    # start the sender
-    pbj_sender = PBJSender(queue_send_cas)
-    # pbj_resender = PbjResender(pbj_sender)
     sentence_printer = JCasSentencePrinter()
     pbj_receiver.start(queue_receive_cas, sentence_printer)
 

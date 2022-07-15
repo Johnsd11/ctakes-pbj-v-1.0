@@ -93,17 +93,17 @@ From: 'an unknown organization'
     License: The BSD 3-Clause License  (http://cleartk.googlecode.com/git/cleartk-type-system/LICENSE)
   - ClearTK Util (http://cleartk.googlecode.com/) org.cleartk:cleartk-util:jar:2.0.0
     License: The BSD 3-Clause License  (http://cleartk.googlecode.com/git/cleartk-util/LICENSE)
-  - JUnit Jupiter (Aggregator) (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter:jar:5.8.2
+  - JUnit Jupiter (Aggregator) (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter:jar:5.9.0-RC1
     License: Eclipse Public License v2.0  (https://www.eclipse.org/legal/epl-v20.html)
-  - JUnit Jupiter API (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter-api:jar:5.8.2
+  - JUnit Jupiter API (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter-api:jar:5.9.0-RC1
     License: Eclipse Public License v2.0  (https://www.eclipse.org/legal/epl-v20.html)
-  - JUnit Jupiter Engine (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter-engine:jar:5.8.2
+  - JUnit Jupiter Engine (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter-engine:jar:5.9.0-RC1
     License: Eclipse Public License v2.0  (https://www.eclipse.org/legal/epl-v20.html)
-  - JUnit Jupiter Params (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter-params:jar:5.8.2
+  - JUnit Jupiter Params (https://junit.org/junit5/) org.junit.jupiter:junit-jupiter-params:jar:5.9.0-RC1
     License: Eclipse Public License v2.0  (https://www.eclipse.org/legal/epl-v20.html)
-  - JUnit Platform Commons (https://junit.org/junit5/) org.junit.platform:junit-platform-commons:jar:1.8.2
+  - JUnit Platform Commons (https://junit.org/junit5/) org.junit.platform:junit-platform-commons:jar:1.9.0-RC1
     License: Eclipse Public License v2.0  (https://www.eclipse.org/legal/epl-v20.html)
-  - JUnit Platform Engine API (https://junit.org/junit5/) org.junit.platform:junit-platform-engine:jar:1.8.2
+  - JUnit Platform Engine API (https://junit.org/junit5/) org.junit.platform:junit-platform-engine:jar:1.9.0-RC1
     License: Eclipse Public License v2.0  (https://www.eclipse.org/legal/epl-v20.html)
   - org.opentest4j:opentest4j (https://github.com/ota4j-team/opentest4j) org.opentest4j:opentest4j:jar:1.2.0
     License: The Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -338,7 +338,7 @@ From: 'The HSQL Development Group' (http://hsqldb.org)
   - HyperSQL Database (http://hsqldb.org) org.hsqldb:hsqldb:jar:2.3.4
     License: HSQLDB License, a BSD open source license  (http://hsqldb.org/web/hsqlLicense.html)
 
-From: 'Ubiquitous Knowledge Processing (UKP) Lab, Technische Universit√§t Darmstadt'
+From: 'Ubiquitous Knowledge Processing (UKP) Lab, Technische Universit‰t Darmstadt'
   - DKPro Core ASL - Metadata API (https://code.google.com/p/dkpro-core-asl/de.tudarmstadt.ukp.dkpro.core.api.metadata-asl/) de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.api.metadata-asl:jar:1.6.0
 
   - DKPro Core ASL - Resources API (https://code.google.com/p/dkpro-core-asl/de.tudarmstadt.ukp.dkpro.core.api.resources-asl/) de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.api.resources-asl:jar:1.6.0

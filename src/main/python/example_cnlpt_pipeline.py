@@ -1,4 +1,6 @@
 import re
+import ctakes_const
+
 
 from process_wrapper import jcas_processor
 from ctakes_types import *
@@ -78,7 +80,7 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
         # Only need taggers for now
         taggers_dict, _ = model_dicts(
             # Hardcoded for now
-            "/home/ch231037/pipeline_models/",
+            "C:\\Users\\ch229935\\Documents\\pipeline_models\\",
         )
         self.type_system = type_system
         self.taggers = taggers_dict
@@ -152,6 +154,7 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
             # and signature mentions
             if task_name == self.central_task:
                 mention = med_mention(begin=start, end=end)
+                mention.typeID = ctakes_const.NE_TYPE_ID_DRUG
             else:
                 mention = sig_mention(begin=start, end=end)
             cas.add_annotation(mention)
