@@ -1,37 +1,94 @@
 # cTAKES Installation Instructions:
 
--install tortoiseSVN https://tortoisesvn.net/downloads.html <br/>
+### Windows
+-install tortoiseSVN https://tortoisesvn.net/downloads.html  <br/>
 -Make sure to check "command line client tools" when downloading tortoiseSVN<br/>
--Set Version control, subversion, path to subverison exe to :  C:\Program Files\TortoiseSVN\bin\svn.exe<br/> 
--Download ctakes project using the svn option in intelliJ "svn co https://svn.apache.org/repos/asf/ctakes/trunk/"<br/> 
--Download ctakes_pbj off of "https://github.com/Johnsd11/Ctakes_PBJ" into the ctakes project directory under the name "ctakes-pbj"<br/> 
--Set Project SDK: corretto-1.8<br/>
--Set Project language level: SDK default (8)<br/>
--install java, install maven<br/>
-for windows: I installed maven using a package manager: chocolatey<br/>
+-Once tortoiseSVN is downloaded, open IntelliJ settings, go to the Version control tab on the left hand side. Select the subversion tab, then in the "path to Subversion executable" field fill in : `C:\Program Files\TortoiseSVN\bin\svn.exe` <br/>
+-Download ctakes project using the `get from VCS` button on the "Welcome to IntelliJ" page.
+-Select the svn option from the Version Control dropdown and add https://svn.apache.org/repos/asf/ctakes/trunk/ then checkout<br/> 
+-Select the 1.8 working format of cTakes <br/>
+-Go back to the "Welcome to IntelliJ" page and use the `get from VCS` button again, this time we want to use git. <br/>
+-Copy this link "https://github.com/Johnsd11/Ctakes_PBJ" and then save the repo in cTakes under the folder "ctakes-pbj" <br/>
+
+
+### Mac and Linux
+-Install Subversion using homebrew then type the command `brew install subversion`(for mac and linux) <br/>
+-Download ctakes project using the `get from VCS` button on the "Welcome to IntelliJ" page.
+-Select the svn option from the Version Control dropdown and add https://svn.apache.org/repos/asf/ctakes/trunk/ then checkout<br/> 
+-Select the 1.8 working format of cTakes <br/>
+-Go back to the "Welcome to IntelliJ" page and use the `get from VCS` button again, this time we want to use git. <br/>
+-Copy this link "https://github.com/Johnsd11/Ctakes_PBJ" and then save the repo in cTakes under the folder "ctakes-pbj" <br/>
+
+
+### Windows
+-install maven using a package manager: chocolatey<br/>
 https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-via-command-line.html<br/>
--Add pbj module to main project pom.xml<br/>
-    - scroll down until you come across `<modules>` list<br/>
+
+
+### Mac and Linux
+-install maven using brew : `brew install maven` <br/>
+
+---
+
+-Search for and open `pom.xml` for ctakes trunk<br/>
+    - Once in the file scroll down until you come across the `<modules>` list<br/>
     - add this line `<module>ctakes-pbj</module>` anywhere on the list<br/>
     - Next look for the `<dependency>` list<br/>
     - add these lines <br/>
     `<dependency>` <br/>
-                    `<groupId>org.apache.ctakes</groupId>`<br/> 
-                    `<artifactId>ctakes-pbj</artifactId>`<br/>
-                    `<version>${project.version}</version>`<br/>
-                `</dependency>`<br/>
--Next open the maven tab on the top right of the intellij window, click Apache cTAKES, Lifecycle, compile<br/>
+         `<groupId>org.apache.ctakes</groupId>`<br/> 
+         `<artifactId>ctakes-pbj</artifactId>`<br/>
+         `<version>${project.version}</version>`<br/>
+    `</dependency>`<br/>
+-Next open the maven tab on the top right of the intellij window, click Apache cTAKES, Lifecycle, install<br/>
+-After this step, the ctakes-pbj directory will appear to have a blue square on it in the left hand side of IntelliJ that displays project structure.
+
+
+
+### Configurations
+-add python plugin from the IntelliJ plugins store <br/>
+-Set Project SDK: corretto-1.8<br/>
+-Set Project language level: SDK default (8)<br/>
+-install the latest version of java<br/>
+-open Project Structure, navigate to modules tab on the left side, find ctakes-pbj, click on it and then press the plus sign and add python 3.8 to it<br/>
+-**IMPORTANT:** You need to make sure that you follow the step above first before you mark the python and java directories as source roots. <br/>
+-Make sure to mark the ctakes-pbj/src/main/python and ctakes-pbj/src/main/java directories as a source roots <br/>
+ 
+
+
+### Downloads
+-Install pip then proceed with: <br/>
+-pip install dkpro-cassis <br/>
+-pip install stomp <br/>
+
   
--open Project Structure, navigate to modules tab on the left side, find ctakes-pbj, click on it and then press the plus sign and add python 3.8 to it<br/> 
 
+ # Artemis Instructions For making a Broker:
+-First download ActiveMQ Artemis here: https://activemq.apache.org/components/artemis/download/<br/>
+-Naviagate to the downloaded apache-artemis folder in your command line<br/>
+-from there cd into bin, then while in bin, type "./artemis create mybroker" for MAC or for windows "artemis create mybroker"<br/>
+-This will prompt a Username and Password which can be anything you want<br/>
+-It will also prompt something called `--allow-anonymous`, Press `Y` <br/>
+-From here you can now cd into mybroker/bin<br/>
+-Once you are in bin again you can run "./artemis run" for MAC or "artemis run" for windows to start the broker<br/>
+-Here are more directions if you need more help or clarification<br/>
+-https://activemq.apache.org/components/artemis/documentation/1.0.0/running-server.html<br/>
+  
+# Running an Example
+-Start an ActiveMQ broker<br/>
+-Run practicetool2.py <br/>
+-Create a config for "src/main/resources/pipeline/example-step3.piper"<br/>
+-org.apache.ctakes.core.pipeline.PiperFileRunner <br/>
+-p ctakes-pbj/src/main/resources/pipeline/example-step3.piper <br/>
+-o (Output can be whatever you want) <br/>
+![step3](https://user-images.githubusercontent.com/34665038/167950327-be92da70-45aa-4c48-b75c-3e762a5cc03b.png)<br/>
+-Create another config for "src/main/resources/pipeline/example-step1.piper"<br/>
+-org.apache.ctakes.core.pipeline.PiperFileRunner <br/>
+-p ctakes-pbj/src/main/resources/pipeline/example-step2.piper <br/>
+-i org/apache/ctakes/examples/notes/annotated <br/>
+![step1](https://user-images.githubusercontent.com/34665038/167950851-9adff1ae-4974-4461-bbba-1000ef8a97f2.png)<br/>
 
-  # Artemis Instructions For making a Broker: <br/>
-  -First download ActiveMQ Artemis here: https://activemq.apache.org/components/artemis/download/<br/>
-  -Naviagate to the downloaded apache-artemis folder in your command line<br/>
-  -from there cd into bin, then while in bin, type "./artemis create mybroker" for MAC or for windows "artemis create mybroker"<br/>
-  -This will prompt a Username and Password which can be anything you want<br/>
-  -From here you can now cd into mybroker/bin<br/>
-  -Once you are in bin again you can run "./artemis run" for MAC or "artemis run" for windows to start the broker<br/>
-  -Here are more directions if you need more help or clarification<br/>
-  -https://activemq.apache.org/components/artemis/documentation/1.0.0/running-server.html<br/>
+  
+  
+
     
