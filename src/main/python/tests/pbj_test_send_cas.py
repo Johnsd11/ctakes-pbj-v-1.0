@@ -18,5 +18,5 @@ with open('tests/test_files/xmi/Peds_FebrileSez_1.xmi', 'rb') as f:
 
 # explain whats going on here
 pbj_sender = pbj_sender.PBJSender('queue/test')
-pbj_sender.sendJCas(cas)
+pbj_sender.send_jcas(cas)
 print("sent")

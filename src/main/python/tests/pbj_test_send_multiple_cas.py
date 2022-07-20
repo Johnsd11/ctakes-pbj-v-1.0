@@ -23,6 +23,6 @@ with open('tests/test_files/xmi/Peds_Dysphagia_1.xmi', 'rb') as f:
 pbj_sender1 = pbj_sender.PBJSender('queue/test')
 pbj_sender2 = pbj_sender.PBJSender('queue/test')
 
-pbj_sender1.sendJCas(cas1)
-pbj_sender2.sendJCas(cas2)
+pbj_sender1.send_jcas(cas1)
+pbj_sender2.send_jcas(cas2)
 print("sent")

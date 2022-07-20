@@ -13,7 +13,7 @@ cas = xmi_to_cas_handler.xmi_to_cas("tests/test_files/xmi/OBGYN_IUD_1.xmi")
 
 # Normally User code would do something with the cas
 
-sender.sendJCas(cas)
+sender.send_jcas(cas)
 
 # Then converts that cas back to XMI
 xmiText = cas_to_xmi_handler.cas_to_xmi(cas)

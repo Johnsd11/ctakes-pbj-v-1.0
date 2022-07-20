@@ -3,9 +3,10 @@ from cassis import *
 
 class CasToXmiHandler:
 
+    @staticmethod
     def cas_to_xmi(self, cas):
         # xmiVar gets an XMI from a CAS
-        xmiVar = Cas.to_xmi(cas)
-        return xmiVar
+        xmi_var = Cas.to_xmi(cas)
+        return xmi_var
 
 

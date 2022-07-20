@@ -29,7 +29,7 @@ class PbjReceiver(stomp.ConnectionListener):
         self.conn.connect(DEFAULT_USER, DEFAULT_PASS, wait=True)
         self.conn.subscribe(destination=self.source_queue, id='1', ack='auto')
 
-    def recieveJCas(self): #IP
+    def recieve_jcas(self): #IP
         int = 0
 
     def handleJCas(self): #IP
@@ -38,7 +38,7 @@ class PbjReceiver(stomp.ConnectionListener):
     def setJCasHandler(self, JCasHandler): #IP
         int = 0
 
-    def setHost(self, host_name): #IP
+    def set_host(self, host_name): #IP
         self.source_host = host_name
 
     def stop(self):
@@ -52,11 +52,12 @@ class PbjReceiver(stomp.ConnectionListener):
         else:
             cas = cassis.load_cas_from_xmi(frame.body, typesystem=self.type_system)
             self.jcas_process.process_jcas(cas)
-            self.pbj_sender.sendJCas(cas)
+            self.pbj_sender.send_jcas(cas)
             print()
 
     def on_disconnected(self):
         self.__connect_and_subscribe()
 
+    @staticmethod
     def main(self):
         start()

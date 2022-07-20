@@ -1,3 +1,5 @@
+# Purpose of this script is to strip the typesystems from a TypeSystem file and
+# get an output with just the typesystem name and location
 
 typeFile = open('resources/TypeSystem.xml', 'r')
 Lines = typeFile.readlines()
