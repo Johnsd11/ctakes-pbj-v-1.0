@@ -1,8 +1,10 @@
-from process_wrapper import jcas_processor
-from ctakes_types import *
+from abc import ABC
+
+from ..process_wrapper import jcas_processor
+from ..consts_types.ctakes_types import *
 
 
-class JCasSentencePrinter(jcas_processor.JCasProcessor):
+class JCasSentencePrinter(jcas_processor.JCasProcessor, ABC):
 
     def process_jcas(self, cas):
         for sentence in cas.select(Sentence):

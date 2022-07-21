@@ -1,12 +1,11 @@
 # Should accept cmd line parameters such as: hostname, port, queue name for recieving cas, and queue name for
 # sending cas
 
-from process_wrapper.jcas_sentence_printer import *
+from example_word_finder import *
 # These are the lines that ignore the typesystem errors
 import warnings
-
-import pbj_receiver
-from pbj_sender import *
+from .. import pbj_util, pbj_receiver
+from ..pbj_sender import *
 
 warnings.filterwarnings("ignore")
 
