@@ -1,8 +1,0 @@
-package org.apache.ctakes.pbj.ae
-
-// Load a simple token processing pipeline from another pipeline file
-load FullTokenizerPipeline.piper
-//load DeepPheCR.piper
-
-// Sending CAS to Artemis
-add PbjSender QUEUE=test/JavaToPython
