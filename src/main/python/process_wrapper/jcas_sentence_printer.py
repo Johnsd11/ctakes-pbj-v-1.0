@@ -1,7 +1,7 @@
 from abc import ABC
 
 from ..process_wrapper import jcas_processor
-from ..consts_types.ctakes_types import *
+from ..consts_type.ctakes_types import *
 
 
 class JCasSentencePrinter(jcas_processor.JCasProcessor, ABC):

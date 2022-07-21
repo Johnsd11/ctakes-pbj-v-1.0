@@ -6,6 +6,7 @@ from example_word_finder import *
 import warnings
 from .. import pbj_util, pbj_receiver
 from ..pbj_sender import *
+from ..process_wrapper import jcas_sentence_printer
 
 warnings.filterwarnings("ignore")
 
@@ -20,7 +21,7 @@ def main():
     print(port)
     print(queue_receive_cas)
     print(queue_send_cas)
-    sentence_printer = JCasSentencePrinter()
+    sentence_printer = jcas_sentence_printer.JCasSentencePrinter()
     pbj_receiver.start(queue_receive_cas, sentence_printer)
 
 
