@@ -1,0 +1,24 @@
+#
+#  This piper file just listens to a queue and saves cas information to output files.
+#
+
+// Add this project package.
+package org.apache.ctakes.pbj.cr
+
+// Set the command line parameter -q to accept the name of the queue from which this pipeline can receive a cas.
+//cli QUEUE=q
+
+// Get cas from Artemis.
+reader PbjReceiver QUEUE=test/PythonToJava
+
+// Save a nice table.
+add SemanticTableFileWriter SubDirectory=table
+
+// Save HTML.
+add pretty.html.HtmlTextWriter SubDirectory=html
+
+// Save marked text.
+add pretty.plaintext.PrettyTextWriterFit SubDirectory=text
+
+// Add the Finished Logger just to let us know that we have disconnected.
+add util.log.FinishedLogger
