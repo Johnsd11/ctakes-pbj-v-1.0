@@ -36,21 +36,20 @@ import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.xml.sax.SAXException;
 
-import javax.jms.*;
-import java.io.*;
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import static org.apache.ctakes.pbj.PbjUtil.*;
 
@@ -68,25 +67,25 @@ public class PbjSender extends JCasAnnotator_ImplBase {
 
    static private final Logger LOGGER = Logger.getLogger( "PbjSender" );
    // to add a configuration parameter, type "param" and hit tab.
-   static public final String PARAM_SENDER_NAME = "SENDER_NAME";
-   static public final String PARAM_SENDER_PASS = "SENDER_PASS";
-   static public final String PARAM_HOST = "HOST";
-   static public final String PARAM_PORT = "PORT";
-   static public final String PARAM_QUEUE = "QUEUE";
-   static public final String PARAM_SEND_STOP = "SEND_STOP";
+   static public final String PARAM_SENDER_NAME = "SenderName";
+   static public final String PARAM_SENDER_PASS = "SenderPass";
+   static public final String PARAM_HOST = "SendHost";
+   static public final String PARAM_PORT = "SendPort";
+   static public final String PARAM_QUEUE = "SendQueue";
+   static public final String PARAM_SEND_STOP = "SendStop";
 
-   static public final String DESC_SENDER_NAME = "The name of the user sending to the Artemis Queue.";
-   static public final String DESC_SENDER_PASS = "The password of the user sending to the Artemis Queue.";
-   static public final String DESC_HOST = "Set a value for Host";
-   static public final String DESC_PORT = "Set a value for Port";
-   static public final String DESC_QUEUE = "Set a value for Queue";
-   static public final String DESC_SEND_STOP = "Send a stop signal after processing is complete";
+   static public final String DESC_SENDER_NAME = "Your Artemis Username.";
+   static public final String DESC_SENDER_PASS = "Your Artemis Password.";
+   static public final String DESC_HOST = "The Artemis Host to send information.";
+   static public final String DESC_PORT = "The Artemis Port to send information.";
+   static public final String DESC_QUEUE = "The Artemis Queue to send information.";
+   static public final String DESC_SEND_STOP = "Yes to send a stop signal to Pbj Receivers.";
 
    @ConfigurationParameter(
-           name = PARAM_SENDER_NAME,
-           description = DESC_SENDER_NAME,
-           mandatory = false,
-           defaultValue = DEFAULT_USER
+         name = PARAM_SENDER_NAME,
+         description = DESC_SENDER_NAME,
+         mandatory = false,
+         defaultValue = DEFAULT_USER
    )
    private String _userName;
 
