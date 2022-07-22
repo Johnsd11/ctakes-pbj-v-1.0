@@ -44,10 +44,10 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
    // to add a configuration parameter, type "param" and hit tab.
    static public final String PARAM_RECEIVER_NAME = "RECEIVER_NAME";
    static public final String PARAM_RECEIVER_PASS = "RECEIVER_PASS";
-   static public final String PARAM_ACCEPT_STOP = "ACCEPT_REMOTE_STOP";
    static public final String PARAM_HOST = "RECEIVE_HOST";
    static public final String PARAM_PORT = "RECEIVE_PORT";
    static public final String PARAM_QUEUE = "RECEIVE_QUEUE";
+   static public final String PARAM_ACCEPT_STOP = "ACCEPT_REMOTE_STOP";
 
    static public final String DESC_RECEIVER_NAME = "Your Artemis Username.";
    static public final String DESC_RECEIVER_PASS = "Your Artemis Password.";
