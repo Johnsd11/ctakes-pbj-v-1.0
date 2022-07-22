@@ -37,7 +37,7 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
          description = DIR_DESC,
          mandatory = false
    )
-   private String _dir;
+   private String _artemisRoot;
 
 
    static public final String LOG_FILE_PARAM = "ArtemisLog";
@@ -83,8 +83,8 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
       final SystemUtil.CommandRunner runner
             = new SystemUtil.CommandRunner( "bin" + File.separatorChar + "artemis run" );
       runner.setLogFiles( _logFile, _logFile );
-      if ( _dir != null && !_dir.isEmpty() ) {
-         runner.setDirectory( _dir );
+      if ( _artemisRoot != null && !_artemisRoot.isEmpty() ) {
+         runner.setDirectory( _artemisRoot );
       }
       LOGGER.info( "Starting Apache Artemis ..." );
       SystemUtil.run( runner );
