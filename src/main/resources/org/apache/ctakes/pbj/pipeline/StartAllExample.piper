@@ -16,6 +16,8 @@ package org.apache.ctakes.pbj.ae
 
 // Set the command line parameter -a to accept the directory of the Artemis installation.
 cli ArtemisRoot=a
+// Set the command line parameter -q to accept the name of the queue to which this pipeline will send a cas.
+//cli SendQueue=q
 
 // Start the Artemis broker and pause 10 seconds.
 add PbjStarter Pause=10
@@ -26,8 +28,8 @@ add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o 
 
 // Start the python bit of the full pipeline.
 // pip the dependency packages if your environment doesn't have them.
-//add CommandRunner Command="python -m pip install dkpro-cassis" Wait=yes
-//add CommandRunner Command="python -m pip install stomp.py" Wait=yes
+add CommandRunner Command="python -m pip install dkpro-cassis" Wait=yes
+add CommandRunner Command="python -m pip install stomp.py" Wait=yes
 add CommandRunner Command="python ctakes-pbj/src/main/python/example_tool2.py" LogFile=pbj_py.log
 
 #

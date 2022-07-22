@@ -6,10 +6,10 @@
 package org.apache.ctakes.pbj.cr
 
 // Set the command line parameter -q to accept the name of the queue from which this pipeline can receive a cas.
-//cli QUEUE=q
+//cli ReceiveQueue=q
 
 // Get cas from Artemis.
-reader PbjReceiver QUEUE=test/PythonToJava
+reader PbjReceiver ReceiveQueue=test/PythonToJava
 
 // Save a nice table.
 add SemanticTableFileWriter SubDirectory=table
