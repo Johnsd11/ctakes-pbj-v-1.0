@@ -8,7 +8,7 @@
 -Select the svn option from the Version Control dropdown and add https://svn.apache.org/repos/asf/ctakes/trunk/ then checkout<br/> 
 -Select the 1.8 working format of cTakes <br/>
 -Go back to the "Welcome to IntelliJ" page and use the `get from VCS` button again, this time we want to use git. <br/>
--Copy this link "https://github.com/Johnsd11/Ctakes_PBJ" and then save the repo in cTakes under the folder "ctakes-pbj" <br/>
+-Copy this link "https://github.com/Johnsd11/ctakes-pbj-v-1.0" and then save the repo in cTakes under the folder "ctakes-pbj" <br/>
 
 
 ### Mac and Linux
