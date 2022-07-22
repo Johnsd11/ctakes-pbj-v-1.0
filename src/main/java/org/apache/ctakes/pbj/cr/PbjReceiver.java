@@ -4,10 +4,11 @@ import org.apache.activemq.artemis.jms.client.ActiveMQBytesMessage;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
 import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
+import org.apache.ctakes.core.config.ConfigParameterConstants;
 import org.apache.ctakes.core.pipeline.PipeBitInfo;
 import org.apache.ctakes.core.pipeline.PipelineBuilder;
-//import org.apache.ctakes.pbj.process.wrapper.JCasProcessor;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
+import org.apache.ctakes.core.util.doc.JCasBuilder;
+import org.apache.log4j.Logger;
 import org.apache.uima.UIMAException;
 import org.apache.uima.UimaContext;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
@@ -23,56 +24,19 @@ import org.xml.sax.SAXException;
 import javax.jms.*;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.apache.ctakes.pbj.PbjUtil.*;
 
-
-/**
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-
-//import org.apache.uima.jcas.tcas.DocumentAnnotation;
-
-/**
- *
- * The original code was copied from org.apache.uima.examples.cpe.FileSystemCollectionReader
- * and modified for Mayo use.
- *
- * This collection reader facilitates reading "documents" from a single file.  Each
- * line in the document will be considered an entity to be analyzed by the CPE.  That
- * is each line will be treated as a "document" and will have its own CAS.
- *
- * Extremely large files will require large memory resources as each line is read into
- * memory upon initialization.  This was done to simplify implementation.
- *
- * @author Philip V. Ogren
- *
- */
 
 
 @PipeBitInfo(
       name = "PbjReceiver",
       description = "Populates JCas based upon XMI content read from an Artemis Queue.",
-      role = PipeBitInfo.Role.READER,
-      products = { PipeBitInfo.TypeProduct.DOCUMENT_ID }
+      role = PipeBitInfo.Role.SPECIAL
 )
 
 public class PbjReceiver extends JCasCollectionReader_ImplBase {
@@ -80,25 +44,26 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
    // to add a configuration parameter, type "param" and hit tab.
    static public final String PARAM_RECEIVER_NAME = "RECEIVER_NAME";
    static public final String PARAM_RECEIVER_PASS = "RECEIVER_PASS";
-   static private final String PARAM_ACCEPT_STOP = "DISCONNECT_ME";
-   static public final String PARAM_HOST = "HOST";
-   static public final String PARAM_PORT = "PORT";
-   static public final String PARAM_QUEUE = "QUEUE";
+   static public final String PARAM_ACCEPT_STOP = "ACCEPT_REMOTE_STOP";
+   static public final String PARAM_HOST = "RECEIVE_HOST";
+   static public final String PARAM_PORT = "RECEIVE_PORT";
+   static public final String PARAM_QUEUE = "RECEIVE_QUEUE";
 
-   static public final String DESC_RECEIVER_NAME = "Set a value for Username";
-   static public final String DESC_RECEIVER_PASS = "Set a value for Password";
-   static public final String DESC_HOST = "Set a value for Host";
-   static public final String DESC_PORT = "Set a value for Port";
-   static public final String DESC_QUEUE = "Set a value for Queue";
-   static public final String DESC_DISC = "Set a value for Disconnect";
+   static public final String DESC_RECEIVER_NAME = "Your Artemis Username.";
+   static public final String DESC_RECEIVER_PASS = "Your Artemis Password.";
+   static public final String DESC_HOST = "The Artemis Host from which to receive information.";
+   static public final String DESC_PORT = "The Artemis Port from which to receive information.";
+   static public final String DESC_QUEUE = "The Artemis Queue from which to receive information.";
+   static public final String DESC_ACCEPT_STOP = "Yes to shut down when the sender sends a stop signal.";
 
-
+   static private final Logger LOGGER = Logger.getLogger( "PbjReceiver" );
+   static private final String EMPTY_CAS = "BadMessageFormatReceivedCreateEmptyJCas";
 
    @ConfigurationParameter(
-           name = PARAM_RECEIVER_NAME,
-           description = DESC_RECEIVER_NAME,
-           mandatory = false,
-           defaultValue = DEFAULT_USER
+         name = PARAM_RECEIVER_NAME,
+         description = DESC_RECEIVER_NAME,
+         mandatory = false,
+         defaultValue = DEFAULT_USER
    )
    private String _userName;
 
@@ -134,9 +99,9 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
 
    @ConfigurationParameter(
          name = PARAM_ACCEPT_STOP,
-         description = DESC_DISC,
+         description = DESC_ACCEPT_STOP,
          mandatory = false,
-           defaultValue = DEFAULT_ACCEPT_STOP
+         defaultValue = DEFAULT_ACCEPT_STOP
    )
    private String _acceptStop;
 
@@ -147,22 +112,20 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
 
 
    /**
-    *
     * {@inheritDoc}
     */
    @Override
-   public void initialize( UimaContext context ) throws ResourceInitializationException {
-      super.initialize(context);
+   public void initialize( final UimaContext context ) throws ResourceInitializationException {
+      super.initialize( context );
       consume();
    }
 
    /**
-    * Creates and starts ActiveMQ connection which uses HostName and Port provided by user.
+    * Creates and starts ActiveMQ connection which uses the configuration provided by user.
     *
-    * @throws ResourceInitializationException
+    * @throws ResourceInitializationException -
     */
    private void consume() throws ResourceInitializationException{
-      boolean complete = false;
       Connection connection = null;
       InitialContext context = null;
       try {
@@ -174,10 +137,10 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
          // On the java side we don't need to parse STOMP.  JMS will automatically translate.
          connection = cf.createConnection();
          final Session session = connection.createSession( false, Session.AUTO_ACKNOWLEDGE );
-         final ActiveMQQueue queue = new ActiveMQQueue(_queueName);
+         final ActiveMQQueue queue = new ActiveMQQueue( _queueName );
          _consumer = session.createConsumer( queue );
          connection.start();
-         System.out.println( "New Consumer Started!" );
+         LOGGER.info( "Python Bridging Java Receiver Started on " + _hostName + " " + _queueName );
       } catch ( NamingException | JMSException IO ) {
          throw new ResourceInitializationException(IO);
       }
@@ -188,12 +151,17 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
     * {@inheritDoc} - Does the same thing as it's parent
     */
    @Override
-   public void getNext( final JCas cas ) throws IOException, CollectionException {
-      try( InputStream textStream = new BufferedInputStream( new ByteArrayInputStream(_messageText.getBytes() ) ) ) {
-         XmiCasDeserializer.deserialize( textStream, cas.getCas() );
+   public void getNext( final JCas jCas ) throws IOException, CollectionException {
+      if ( _messageText.equals( EMPTY_CAS ) ) {
+         new JCasBuilder().setDocText( "" )
+                          .rebuild( jCas );
+         return;
+      }
+      try ( InputStream textStream = new BufferedInputStream( new ByteArrayInputStream( _messageText.getBytes() ) ) ) {
+         XmiCasDeserializer.deserialize( textStream, jCas.getCas() );
          _casCount++;
-      } catch (SAXException e) {
-         throw new CollectionException(e);
+      } catch ( SAXException e ) {
+         throw new CollectionException( e );
       }
    }
 
@@ -215,32 +183,32 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
 
 
    /**
-    *
     * {@inheritDoc}
     */
    @Override
-   public boolean hasNext() throws IOException, CollectionException {
-      try{
+   public boolean hasNext() throws CollectionException {
+      try {
          final Message message = _consumer.receive();
          String text = "";
          if ( message instanceof TextMessage ) {
-            text = ((TextMessage)message).getText();
+            text = ( (TextMessage) message ).getText();
          } else if ( message instanceof ActiveMQBytesMessage ) {
             text = readBytesMessage( (BytesMessage) message );
-         } else if ( message != null ){
-            throw new CollectionException(new IOException("Got unexpected message " + message.getClass().getName() +
-                                                          "\n" + message.toString()));
+         } else if ( message != null ) {
+            LOGGER.error( "Got unexpected message format " + message.getClass()
+                                                                    .getName()
+                          + "\n" + message.toString() + "\nProcessing Empty Document." );
+            text = EMPTY_CAS;
          }
          //println( "Testing this right now :" + text );
          if ( !text.isEmpty() ) {
-            if ( _acceptStop.equals( "yes" ) && text.equals( STOP_MESSAGE )) {
+            if ( _acceptStop.equalsIgnoreCase( "yes" ) && text.equals( STOP_MESSAGE ) ) {
                return false;
             }
             _messageText = text;
          }
-      }
-      catch ( JMSException Io ){
-         throw new CollectionException(Io);
+      } catch ( JMSException jmsE ) {
+         throw new CollectionException( jmsE );
       }
       return true;
    }
@@ -257,64 +225,31 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
    }
 
 
-   public void setQueue( String queue){
-      _queueName = queue;
-   }
-
-   public void setHost( String host){
-      _hostName = host;
-   }
-
-   public void setPort( int port){
-      _port = port;
-   }
-
-//   public void setJCasProcessor(JCasProcessor processor){
-//      // ctakes uses an uima pipeline, so the cas processor is essentially the rest of the pipeline.
-//   }
-
-   public void receiveJCas(){
-      // since this is actually an uima collection reader, getNext() handles jcas reception.
-   }
-
-   public void handleJCas(){
-
-   }
-
-   public void setUserName( final String userName){
-      _userName = userName;
-   }
-
-   public void setPassword( final String password){
-      _password = password;
-   }
-
-
+   /**
+    * Start a PbjReceiver, listening to a queue named "testQueue" and accepting a stop signal sent from any PbjSender.
+    * Writes Marked up plaintext files to a directory named "output" in the current working directory.
+    *
+    * @param args -
+    */
    public static void main( String[] args ) {
       try {
-         //println(  );
          new PipelineBuilder().set( PARAM_ACCEPT_STOP, "yes" )
                               .set( PARAM_QUEUE, "testQueue" )
                               .reader( PbjReceiver.class )
-                              .set( "OutputDirectory", "/Users/CHIPadmin/Desktop" )
+                              .set( ConfigParameterConstants.PARAM_OUTPUTDIR, "output" )
                               .add( PrettyTextWriterFit.class )
-                              .run( );
-                              //.add( HtmlTextWriter.class)
-                              //.add( PropertyTextWriterFit.class )
-
+                              .run();
+      } catch ( UIMAException | IOException IO ) {
+         System.err.println( IO.getMessage() );
       }
-      //This is what would be in a piper file
-      //set DISCONNECT_ME=yes
-      //set QUEUE=testQueue
-      //reader Consumer
-      //set OutputDirectory=/Users/CHIPadmin/Desktop
-      //add pretty.html.HtmlTextWriter
-      //add pretty.plaintext.PrettyTextWriterFit
-      //add property.plaintext.PropertyTextWriterFit
 
-      catch( UIMAException | IOException IO) {
-         System.err.println(IO.getMessage());
-      }
+      // Below is the equivalent instruction set for a piper file:
+
+      // set ACCEPT_REMOTE_STOP=yes
+      // set RECEIVE_QUEUE=testQueue
+      // reader PbjReceiver
+      // set OutputDirectory=output
+      // add pretty.plaintext.PrettyTextWriterFit
    }
 
 
