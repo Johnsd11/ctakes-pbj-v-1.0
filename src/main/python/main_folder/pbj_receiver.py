@@ -1,6 +1,7 @@
-import stomp
-import cassis
 from threading import Event
+
+import stomp
+
 from pbj_util import *
 
 exit_event = Event()
@@ -29,13 +30,13 @@ class PbjReceiver(stomp.ConnectionListener):
         self.conn.connect(DEFAULT_USER, DEFAULT_PASS, wait=True)
         self.conn.subscribe(destination=self.source_queue, id='1', ack='auto')
 
-    def recieve_jcas(self): #IP
+    def receive_jcas(self): #IP
         int = 0
 
-    def handleJCas(self): #IP
+    def handle_jcas(self): #IP
         int = 0
 
-    def setJCasHandler(self, JCasHandler): #IP
+    def set_jcas_handler(self, JCasHandler): #IP
         int = 0
 
     def set_host(self, host_name): #IP
@@ -50,6 +51,7 @@ class PbjReceiver(stomp.ConnectionListener):
         if frame.body == STOP_MESSAGE:
             self.stop()
         else:
+
             cas = cassis.load_cas_from_xmi(frame.body, typesystem=self.type_system)
             self.jcas_process.process_jcas(cas)
             self.pbj_sender.send_jcas(cas)

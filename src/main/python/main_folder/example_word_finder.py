@@ -1,4 +1,4 @@
-from process_wrapper import jcas_processor
+import jcas_processor
 from ctakes_types import *
 
 

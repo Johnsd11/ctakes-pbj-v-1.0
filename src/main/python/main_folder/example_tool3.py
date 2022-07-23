@@ -8,7 +8,7 @@ from pbj_util import *
 
 import pbj_receiver
 from pbj_sender import *
-
+from jcas_sentence_printer import *
 warnings.filterwarnings("ignore")
 
 
@@ -29,8 +29,8 @@ def main():
     pbj_sender = PBJSender(queue_send_cas)
     # pbj_resender = PbjResender(pbj_sender)
     type_system_accessor = TypeSystemAccessor()
-    cnlpt_pipe = ExampleCnlptPipeline(type_system_accessor.getTypeSystem())
-    pbj_receiver.start(queue_receive_cas, cnlpt_pipe, type_system_accessor.getTypeSystem(), pbj_sender)
+    cnlpt_pipe = JCasSentencePrinter(type_system_accessor.get_type_system())
+    pbj_receiver.start(queue_receive_cas, cnlpt_pipe, type_system_accessor.get_type_system(), pbj_sender)
 
 
 main()
