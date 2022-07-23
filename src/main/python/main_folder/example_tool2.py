@@ -2,11 +2,13 @@
 # sending cas
 
 
-from example_word_finder import *
+import example_word_finder
 # These are the lines that ignore the typesystem errors
 import warnings
-from .. import pbj_util, pbj_receiver
-from ..pbj_sender import *
+import pbj_util
+import pbj_receiver
+from pbj_sender import *
+
 
 warnings.filterwarnings("ignore")
 
@@ -25,8 +27,10 @@ def main():
     pbj_sender = PBJSender(queue_send_cas)
 
     type_system_accessor = pbj_util.TypeSystemAccessor()
-    word_finder = ExampleWordFinder(type_system_accessor.get_type_system())
-    pbj_receiver.start(queue_receive_cas, word_finder, type_system_accessor.get_type_system(), pbj_sender)
+    type_system_accessor.load_type_system()
+    word_finder = example_word_finder.ExampleWordFinder(type_system_accessor.get_type_system())
+    pbj_receiver.start(queue_name=queue_receive_cas, pbj_user_process=word_finder,
+                       type_system=type_system_accessor.get_type_system(), pbj_sender=pbj_sender)
 
 
 main()
