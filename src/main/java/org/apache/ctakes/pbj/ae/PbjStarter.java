@@ -41,7 +41,8 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
 
 
    static public final String LOG_FILE_PARAM = "ArtemisLog";
-   static public final String LOG_FILE_DESC = "File to which Artemis output should be sent.";
+   static public final String LOG_FILE_DESC = "File to which Artemis output should be sent. Default is ctakes_artemis"
+                                              + ".log";
    @ConfigurationParameter(
          name = LOG_FILE_PARAM,
          description = LOG_FILE_DESC,
@@ -65,6 +66,9 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
    @Override
    public void initialize( final UimaContext context ) throws ResourceInitializationException {
       super.initialize( context );
+      if ( _artemisRoot != null && !_artemisRoot.isEmpty() && !( new File( _artemisRoot ).exists() ) ) {
+         LOGGER.warn( "Cannot find Artemis Root Directory " + _artemisRoot );
+      }
       try {
          runCommand();
       } catch ( IOException ioE ) {
