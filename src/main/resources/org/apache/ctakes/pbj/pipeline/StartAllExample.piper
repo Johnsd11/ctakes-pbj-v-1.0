@@ -10,31 +10,45 @@
 #  This piper will then launch a python pbj bit of the entire pipeline.
 #
 
-// Add this project package.
+// Add this project's packages.
 package org.apache.ctakes.pbj
 package org.apache.ctakes.pbj.ae
 
+
 // Set the command line parameter -a to accept the directory of the Artemis installation.
 cli ArtemisRoot=a
-// Set the command line parameter -q to accept the name of the queue to which this pipeline will send a cas.
-//cli SendQueue=q
+// Set the command line parameter -d to accept the directory of the Python installation.
+cli CommandDir=d
 
+
+//
 // Start the Artemis broker and pause 10 seconds.
+//
+
 add PbjStarter Pause=10
 
+
+//
 // Start another instance of cTAKES, running the pipeline in StartAllExample_end.piper
 // Use the same queue as the python PBJ pipeline.
+//
+
 add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o output/temp"
 
+
+//
 // Start the python bit of the full pipeline.
 // pip the dependency packages if your environment doesn't have them.
+//
+
 add CommandRunner Command="python -m pip install dkpro-cassis" Wait=yes
 add CommandRunner Command="python -m pip install stomp.py" Wait=yes
-add CommandRunner Command="python ctakes-pbj/src/main/python/example_tool2.py" LogFile=pbj_py.log
+add CommandRunner Command="python ctakes-pbj/src/main/python/main_folder/example_tool2.py" LogFile=pbj_py.log
 
-#
-# Start specifying the pipeline run by this instance of cTAKES.
-#
+
+//
+// The pipeline run by this instance of cTAKES.
+//
 
 // Write nice big banners when ctakes starts and finishes.
 set WriteBanner=yes

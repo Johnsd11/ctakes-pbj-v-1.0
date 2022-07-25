@@ -16,6 +16,7 @@ import java.net.URI;
  * @author DJ , chip-nlp
  * @since {1/13/22}
  */
+@Deprecated
 public enum Producerinfo {
    INSTANCE;
 

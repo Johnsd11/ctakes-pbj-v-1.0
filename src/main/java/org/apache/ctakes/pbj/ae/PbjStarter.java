@@ -45,9 +45,10 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
    @ConfigurationParameter(
          name = LOG_FILE_PARAM,
          description = LOG_FILE_DESC,
+         defaultValue = "ctakes_artemis.log",
          mandatory = false
    )
-   private String _logFile = "ctakes_artemis.log";
+   private String _logFile;
 
    static public final String PAUSE_PARAM = "Pause";
    static public final String PAUSE_DESC = "Pause for some seconds after launching.  Default is 0";

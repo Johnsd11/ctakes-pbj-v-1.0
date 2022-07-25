@@ -5,9 +5,6 @@
 // Add this project package.
 package org.apache.ctakes.pbj.cr
 
-// Set the command line parameter -q to accept the name of the queue from which this pipeline can receive a cas.
-//cli ReceiveQueue=q
-
 // Get cas from Artemis.
 reader PbjReceiver ReceiveQueue=test/PythonToJava
 

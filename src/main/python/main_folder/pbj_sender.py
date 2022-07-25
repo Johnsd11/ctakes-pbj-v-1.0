@@ -1,5 +1,6 @@
 import stomp
-from pbj_util import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS
+
+from pbj_util import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS, STOP_MESSAGE
 
 
 class PBJSender:
@@ -21,8 +22,12 @@ class PBJSender:
 
     @staticmethod
     def send_stop(self):
-        #something
-        int =0
+        # something
+        conn = stomp.Connection([(self.target_host, self.target_port)])
+        conn.connect(self.username, self.password, wait=True)
+        conn.send(self.target_queue, STOP_MESSAGE)
+        print("sent stop to: " + self.target_queue)
+        int = 0
 
     def set_queue(self, queue_name):
         self.target_queue = queue_name

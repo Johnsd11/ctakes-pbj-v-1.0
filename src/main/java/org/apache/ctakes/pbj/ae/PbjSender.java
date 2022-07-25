@@ -197,7 +197,8 @@ public class PbjSender extends JCasAnnotator_ImplBase {
    }
 
    public void sendStop() throws IOException {
-      sendText(_queue, STOP_MESSAGE );
+      LOGGER.info( "Sending Stop to " + _queue );
+      sendText( _queue, STOP_MESSAGE );
    }
 
 
@@ -213,7 +214,7 @@ public class PbjSender extends JCasAnnotator_ImplBase {
       try ( DotLogger dotter = new DotLogger() ) {
          // run long initialization process.  Caught Exception may be of some other type.
          _id = createID();
-         timeOutLoop(_host, _port, _id, 30 );
+         startTimeOutLoop( _host, _port, _id, 30 );
       } catch ( IOException ioE ) {
          throw new ResourceInitializationException( ioE );
       }
@@ -226,16 +227,17 @@ public class PbjSender extends JCasAnnotator_ImplBase {
 
    /**
     * Starts up a background thread to constantly disconnect and reconnect the sender socket.
+    *
     * @param host -
     * @param port -
-    * @param id -
+    * @param id   -
     * @param wait timeout / reconnection interval in seconds
     * @throws IOException -
     */
-   private void timeOutLoop(  final String host,
-                              final int port,
-                              final String id,
-                              final long wait ) throws IOException {
+   private void startTimeOutLoop( final String host,
+                                  final int port,
+                                  final String id,
+                                  final long wait ) throws IOException {
       final Reconnects reconnects = new Reconnects( host, port, id );
       _executor.scheduleAtFixedRate( reconnects, 0, wait, TimeUnit.SECONDS );
    }
@@ -267,15 +269,12 @@ public class PbjSender extends JCasAnnotator_ImplBase {
     */
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
-      // Implementation of the process(..) method is mandatory, even if it does nothing.
-      LOGGER.info( "Processing ..." );
+      LOGGER.info( "Sending to " + _queue + " ..." );
       try ( DotLogger dotter = new DotLogger() ) {
-         // run long process.  Caught Exception may be of some other type.
          sendJCas( jcas );
       } catch ( IOException | SAXException ioE ) {
          throw new AnalysisEngineProcessException( ioE );
       }
-      // If the process is quick then do not use the DotLogger.
    }
 
    /**
@@ -283,31 +282,31 @@ public class PbjSender extends JCasAnnotator_ImplBase {
     * @throws AnalysisEngineProcessException
     */
    public void collectionProcessComplete() throws AnalysisEngineProcessException {
-      if(_sendStop.equalsIgnoreCase( "yes" )){
-         try{
+      if ( _sendStop.equalsIgnoreCase( "yes" ) ) {
+         try {
             sendStop();
             disconnect( _id );
             System.exit( 0 );
-         }
-         catch(IOException IO){
-            throw new AnalysisEngineProcessException(IO);
+         } catch ( IOException ioE ) {
+            throw new AnalysisEngineProcessException( ioE );
          }
       }
    }
+
    /**
     * Serialize a CAS to a file in XMI format
     *
-    * @param cas  CAS to serialize
+    * @param cas CAS to serialize
     * @throws IOException  -
     * @throws SAXException -
     */
-   private void sendXmi( final CAS cas) throws IOException, SAXException {
-      try ( ByteArrayOutputStream outputStream =  new ByteArrayOutputStream() ) {
+   private void sendXmi( final CAS cas ) throws IOException, SAXException {
+      try ( ByteArrayOutputStream outputStream = new ByteArrayOutputStream() ) {
          XmiCasSerializer casSerializer = new XmiCasSerializer( cas.getTypeSystem() );
          XMISerializer xmiSerializer = new XMISerializer( outputStream );
          casSerializer.serialize( cas, xmiSerializer.getContentHandler() );
-         String XMI = new String (outputStream.toByteArray());
-         sendText(_queue,XMI);
+         String XMI = new String( outputStream.toByteArray() );
+         sendText( _queue, XMI );
       }
    }
 
@@ -390,7 +389,6 @@ public class PbjSender extends JCasAnnotator_ImplBase {
          _socket = createSocket( host, port );
          sendFrame( connectFrame );
          String response = receiveFrame();
-         //      System.out.println( "Connect response: " + response );
       }
    }
 
@@ -428,7 +426,6 @@ public class PbjSender extends JCasAnnotator_ImplBase {
          }
          sendFrame( disconnectFrame );
          String response = receiveFrame();
-//      System.out.println( "Disconnect response: " + response );
          closeSocket();
       }
    }
@@ -573,12 +570,11 @@ public class PbjSender extends JCasAnnotator_ImplBase {
                               // its own description to handle it
                               .addDescription( POSTagger.createAnnotatorDescription() )
                               .set( PARAM_QUEUE, "testQueue" )
-                              .set(PARAM_SEND_STOP, "yes" )
+                              .set( PARAM_SEND_STOP, "yes" )
                               .add( PbjSender.class )
                               .run();
-      }
-      catch( UIMAException | IOException IO) {
-         System.err.println(IO.getMessage());
+      } catch ( UIMAException | IOException multE ) {
+         multE.printStackTrace();
       }
    }
 

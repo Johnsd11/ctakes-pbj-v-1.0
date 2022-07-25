@@ -44,6 +44,7 @@ class PbjReceiver(stomp.ConnectionListener):
 
     def stop(self):
         self.conn.disconnect()
+        self.pbj_sender.send_stop()
         exit_event.set()
 
     def on_message(self, frame):
