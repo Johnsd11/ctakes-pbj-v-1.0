@@ -7,7 +7,7 @@ from ctakes_types import *
 #
 #     This is an old test of adding modifiers through attributes using cassis.
 #     To add Modifiers through attributes use the add_attribute API.
-#     An example is add_attribute_test.py
+#     An appropriate example is add_med_example.py
 #
 
 # Load the typesystem
