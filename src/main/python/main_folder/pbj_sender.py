@@ -14,19 +14,17 @@ class PBJSender:
         self.username = username
 
     def send_jcas(self, cas):
+        print("Sending to " + self.target_queue + " ...")
         xmi = cas.to_xmi()
         conn = stomp.Connection([(self.target_host, self.target_port)])
         conn.connect(self.username, self.password, wait=True)
         conn.send(self.target_queue, xmi)
-        print("sent to: " + self.target_queue)
 
-    @staticmethod
     def send_stop(self):
-        # something
         conn = stomp.Connection([(self.target_host, self.target_port)])
         conn.connect(self.username, self.password, wait=True)
         conn.send(self.target_queue, STOP_MESSAGE)
-        print("sent stop to: " + self.target_queue)
+        print("Sending Stop to " + self.target_queue)
         int = 0
 
     def set_queue(self, queue_name):
