@@ -1,9 +1,14 @@
-
-from ctakes_types import *
 from cassis import *
 from cassis.typesystem import TYPE_NAME_FS_ARRAY
-import pbj_util
 
+import pbj_util
+from ctakes_types import *
+
+#
+#     This is an old test of adding modifiers through attributes using cassis.
+#     To add Modifiers through attributes use the add_attribute API.
+#     An example is add_attribute_test.py
+#
 
 # Load the typesystem
 type_system_accessor = pbj_util.TypeSystemAccessor()
