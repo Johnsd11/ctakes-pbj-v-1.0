@@ -15,6 +15,8 @@ class TypeSystemAccessor:
         self.typesystem = 0
         self.type_system_file = type_system_file
 
+    # TODO - Can load_type_system and get_type_system be combined?  i.e. can get_ call load_ then return ?
+
     def load_type_system(self):
         if self.typesystem == 0:
             with open(self.type_system_file, 'rb') as f:
