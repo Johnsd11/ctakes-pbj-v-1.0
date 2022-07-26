@@ -126,6 +126,14 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
         self.out_models = out_dict
         # Hard-coding for now
         self.central_task = "dphe_med"
+        self.task_obj_map = {
+            'dosage': (MedicationDosageModifier, MedicationDosage),
+            'duration': (MedicationDurationModifier, MedicationDuration),
+            'form': (MedicationFormModifier, MedicationForm),
+            'freq': (MedicationFrequencyModifier, MedicationFrequency),
+            'route': (MedicationRouteModifier, MedicationRoute),
+            'strength': (MedicationStrengthModifier, MedicationStrength),
+        }
 
     def process_jcas(self, cas):
         raw_sentences = sorted(cas.select(Sentence), key=lambda s: s.begin)
@@ -167,18 +175,29 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
                 print(sent_axis_idxs)
                 print(sent_sig_idxs)
                 tokenized_sent = sent.split()
+                med_type = None
                 for axis_task, axis_offsets in sent_axis_idxs.items():
                     for axis_offset in axis_offsets:
                         print(f"Axis reached {axis_task} {axis_offset}")
                         axis_begin, axis_end = axis_offset
                         print(f"{axis_task} : {tokenized_sent[axis_begin:axis_end + 1]}")
                         print(f"Local character indices : {sent_map[axis_begin][0], sent_map[axis_end][1]}")
+
+                        medMention = cas.typesystem.get_type(MedicationEventMention)
+                        med_type = medMention(
+                            begin=sent_map[axis_begin][0],
+                            end=sent_map[axis_end][1],
+                        )
+                        cas.add(med_type)
+
                 for sig_task, sig_offsets in sent_sig_idxs.items():
+                    task_label = sig_task.split('_')[-1]
                     for sig_offset in sig_offsets:
                         print(f"Sig reached {sig_task} {sig_offset}")
                         sig_begin, sig_end = sig_offset
                         print(f"{sig_task} : {tokenized_sent[sig_begin:sig_end + 1]}")
                         print(f"Local character indices : {sent_map[sig_begin][0], sent_map[sig_end][1]}")
+
             report = cnlp_compute_metrics(
                 classifier_to_relex[task_name],
                 # Giant relex matrix of the predictions
