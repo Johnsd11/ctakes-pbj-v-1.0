@@ -1,31 +1,26 @@
-import numpy as np
-
-import jcas_processor
-from ctakes_types import *
-
 from itertools import product
+from cassis import *
 
-from cassis import load_cas_from_xmi
+from cassis.typesystem import TYPE_NAME_FS_ARRAY
 
-from cnlpt.cnlp_pipeline_utils import (
-    model_dicts,
-    get_predictions,
-    relex_label_to_matrix,
-)
-
+import numpy as np
 from cnlpt.CnlpModelForClassification import (
     CnlpModelForClassification,
     CnlpConfig,
 )
-
+from cnlpt.cnlp_pipeline_utils import (
+    model_dicts,
+    get_predictions,
+)
 from cnlpt.cnlp_processors import (
     cnlp_processors,
     cnlp_compute_metrics,
     classifier_to_relex,
 )
-
 from transformers import AutoConfig, AutoModel
 
+import jcas_processor
+from ctakes_types import *
 
 def get_args_to_rel_map(cas):
     args_to_rel = {}
@@ -138,9 +133,19 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
     def process_jcas(self, cas):
         raw_sentences = sorted(cas.select(Sentence), key=lambda s: s.begin)
         doc_labels, max_sent_len = get_relex_labels(cas, raw_sentences)
+        FSArray = cas.typesystem.get_type(TYPE_NAME_FS_ARRAY)
 
         if max_sent_len > self.corpus_max_sent_len:
             self.corpus_max_sent_len = max_sent_len
+
+        def get_ctakes_type(ty):
+            return cas.typesystem.get_type(ty)
+
+        def get_ctakes_types(type_pair):
+            return tuple(map(get_ctakes_type, type_pair))
+
+        ctakes_type_map = {task: get_ctakes_types(type_pair) for task, type_pair in self.task_obj_map.items()}
+        modifier_reference_map = {modifier: set() for modifier in list(zip(*ctakes_type_map.values()))[1]}
 
         def cas_clean_sent(sent):
             return ctakes_clean(cas, sent)
@@ -192,11 +197,23 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
 
                 for sig_task, sig_offsets in sent_sig_idxs.items():
                     task_label = sig_task.split('_')[-1]
+                    attr_mod_type, attr_type = ctakes_type_map(task_label)
                     for sig_offset in sig_offsets:
                         print(f"Sig reached {sig_task} {sig_offset}")
                         sig_begin, sig_end = sig_offset
                         print(f"{sig_task} : {tokenized_sent[sig_begin:sig_end + 1]}")
                         print(f"Local character indices : {sent_map[sig_begin][0], sent_map[sig_end][1]}")
+
+                        attr_mod = attr_mod_type(
+                            begin=sent_map[sig_begin][0],
+                            end=sent_map[sig_end][1],
+                        )
+
+                        attr = attr_type()
+                        cas.add(attr_mod)
+                        cas.add(attr)
+                        modifier_reference_map[attr_mod_type].add(attr_mod_type)
+                    attr_mods = FSArray(elements=[list(modifier_reference_map[attr_mod_type])])
 
             report = cnlp_compute_metrics(
                 classifier_to_relex[task_name],
