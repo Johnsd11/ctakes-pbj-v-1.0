@@ -53,14 +53,6 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 -open Project Structure, navigate to modules tab on the left side, find ctakes-pbj, click on it and then press the plus sign and add python 3.8 to it<br/>
 -**IMPORTANT:** You need to make sure that you follow the step above first before you mark the python and java directories as source roots. <br/>
 -Make sure to mark the ctakes-pbj/src/main/python and ctakes-pbj/src/main/java directories as a source roots <br/>
- 
-
-
-### Downloads
--Install pip then proceed with: <br/>
--pip install dkpro-cassis <br/>
--pip install stomp <br/>
-
   
 
  # Artemis Instructions For making a Broker:
@@ -75,17 +67,18 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 -https://activemq.apache.org/components/artemis/documentation/1.0.0/running-server.html<br/>
   
 # Running an Example
--Start an ActiveMQ broker<br/>
--Run practicetool2.py <br/>
--Create a config for "src/main/resources/pipeline/example-step3.piper"<br/>
+-You can start running an example by creating an application configuration<br/>
+-You can call it whatever you want, we called it "StartAllExample"<br/>
+Information that needs to be used in the application configuration:<br/>
 -org.apache.ctakes.core.pipeline.PiperFileRunner <br/>
--p ctakes-pbj/src/main/resources/pipeline/example-step3.piper <br/>
--o (Output can be whatever you want) <br/>
-![step3](https://user-images.githubusercontent.com/34665038/167950327-be92da70-45aa-4c48-b75c-3e762a5cc03b.png)<br/>
--Create another config for "src/main/resources/pipeline/example-step1.piper"<br/>
--org.apache.ctakes.core.pipeline.PiperFileRunner <br/>
--p ctakes-pbj/src/main/resources/pipeline/example-step2.piper <br/>
--i org/apache/ctakes/examples/notes/annotated <br/>
+-p "org/apache/ctakes/pbj/pipeline/StartAllExample"
+-i "org/apache/ctakes/examples/notes/annotated"
+-a "[Destination of your Artemis Broker]"
+-d "[Destinaiton of your python.exe]"
+
+![step3](<img width="630" alt="StartAllExampleConfig" src="https://user-images.githubusercontent.com/34665038/181270724-c1dbc854-397a-4b1f-b5db-e194adf074d5.png">)<br/>
+![step1](<img width="447" alt="StartAllExampleParms" src="https://user-images.githubusercontent.com/34665038/181271047-cf112a93-0d8c-4734-aa21-1281377e6762.png">)
+
 ![step1](https://user-images.githubusercontent.com/34665038/167950851-9adff1ae-4974-4461-bbba-1000ef8a97f2.png)<br/>
 
   
