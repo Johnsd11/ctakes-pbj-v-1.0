@@ -181,10 +181,15 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
                 print(sent_sig_idxs)
                 tokenized_sent = sent.split()
                 med_type = None
+
+                axis_idx_mention_map = {}
+                sig_idx_mention_map = {}
+
                 for axis_task, axis_offsets in sent_axis_idxs.items():
                     for axis_offset in axis_offsets:
                         print(f"Axis reached {axis_task} {axis_offset}")
                         axis_begin, axis_end = axis_offset
+
                         print(f"{axis_task} : {tokenized_sent[axis_begin:axis_end + 1]}")
                         print(f"Local character indices : {sent_map[axis_begin][0], sent_map[axis_end][1]}")
 
@@ -193,6 +198,7 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
                             begin=sent_map[axis_begin][0],
                             end=sent_map[axis_end][1],
                         )
+                        axis_idx_mention_map[axis_begin] = med_type
                         cas.add(med_type)
 
                 for sig_task, sig_offsets in sent_sig_idxs.items():
@@ -212,6 +218,7 @@ class ExampleCnlptPipeline(jcas_processor.JCasProcessor):
                         attr = attr_type()
                         cas.add(attr_mod)
                         cas.add(attr)
+                        sig_idx_mention_map[sig_begin] = attr_mod
                         modifier_reference_map[attr_mod_type].add(attr_mod_type)
                     attr_mods = FSArray(elements=[list(modifier_reference_map[attr_mod_type])])
 
