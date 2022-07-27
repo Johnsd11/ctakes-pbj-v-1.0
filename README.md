@@ -71,15 +71,13 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 -You can call it whatever you want, we called it "StartAllExample"<br/>
 Information that needs to be used in the application configuration:<br/>
 -org.apache.ctakes.core.pipeline.PiperFileRunner <br/>
--p "org/apache/ctakes/pbj/pipeline/StartAllExample"
--i "org/apache/ctakes/examples/notes/annotated"
--a "[Destination of your Artemis Broker]"
--d "[Destinaiton of your python.exe]"
+-p "org/apache/ctakes/pbj/pipeline/StartAllExample" <br/>
+-i "org/apache/ctakes/examples/notes/annotated" <br/>
+-a "[Destination of your Artemis Broker]" <br/>
+-d "[Destinaiton of your python.exe]" <br/>
 
 ![step3](https://user-images.githubusercontent.com/34665038/181270724-c1dbc854-397a-4b1f-b5db-e194adf074d5.png)<br/>
-![step1](https://user-images.githubusercontent.com/34665038/181271047-cf112a93-0d8c-4734-aa21-1281377e6762.png)
-
-![step1](https://user-images.githubusercontent.com/34665038/167950851-9adff1ae-4974-4461-bbba-1000ef8a97f2.png)<br/>
+![step1](https://user-images.githubusercontent.com/34665038/181271047-cf112a93-0d8c-4734-aa21-1281377e6762.png)<br/>
 
   
   
