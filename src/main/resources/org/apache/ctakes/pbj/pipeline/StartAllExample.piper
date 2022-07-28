@@ -25,7 +25,7 @@ cli CommandDir=d
 // Start the Artemis broker and pause 10 seconds.
 //
 
-add PbjStarter Pause=10
+add ArtemisStarter Pause=5
 
 
 //

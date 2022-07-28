@@ -203,6 +203,7 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
          //println( "Testing this right now :" + text );
          if ( !text.isEmpty() ) {
             if ( _acceptStop.equalsIgnoreCase( "yes" ) && text.equals( STOP_MESSAGE ) ) {
+               LOGGER.info("Got Stop Message");
                return false;
             }
             _messageText = text;

@@ -5,6 +5,9 @@
 // Add this project package.
 package org.apache.ctakes.pbj.cr
 
+//Add Package of ArtemisStopper (ae)
+package org.apache.ctakes.pbj.ae
+
 // Get cas from Artemis.
 reader PbjReceiver ReceiveQueue=test/PythonToJava
 
@@ -19,3 +22,6 @@ add pretty.plaintext.PrettyTextWriterFit SubDirectory=text
 
 // Add the Finished Logger just to let us know that we have disconnected.
 add util.log.FinishedLogger
+
+//Place to put ArtemisStopper
+add ArtemisStopper ArtemisRoot=C:\Users\ch229935\Desktop\apache-artemis-2.22.0\bin\mybroker

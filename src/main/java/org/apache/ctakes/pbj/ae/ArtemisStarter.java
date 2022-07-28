@@ -21,13 +21,13 @@ import java.io.IOException;
  * @since {5/10/2022}
  */
 @PipeBitInfo(
-      name = "PbjStarter",
+      name = "ArtemisStarter",
       description = "Starts an Apache Artemis broker.",
       role = PipeBitInfo.Role.SPECIAL
 )
-public class PbjStarter extends JCasAnnotator_ImplBase {
+public class ArtemisStarter extends JCasAnnotator_ImplBase {
 
-   static private final Logger LOGGER = Logger.getLogger( "PbjStarter" );
+   static private final Logger LOGGER = Logger.getLogger( "ArtemisStarter" );
 
 
    static public final String DIR_PARAM = "ArtemisRoot";
@@ -46,7 +46,7 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
    @ConfigurationParameter(
          name = LOG_FILE_PARAM,
          description = LOG_FILE_DESC,
-         defaultValue = "ctakes_artemis.log",
+         defaultValue = "ctakes_artemis_starter.log",
          mandatory = false
    )
    private String _logFile;
@@ -83,7 +83,6 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
       // Implementation of the process(..) method is mandatory, even if it does nothing.
    }
-
    private void runCommand() throws IOException {
       final SystemUtil.CommandRunner runner
             = new SystemUtil.CommandRunner( "bin" + File.separatorChar + "artemis run" );
@@ -107,7 +106,7 @@ public class PbjStarter extends JCasAnnotator_ImplBase {
 
    static public AnalysisEngineDescription createEngineDescription( final String artemisDir )
          throws ResourceInitializationException {
-      return AnalysisEngineFactory.createEngineDescription( PbjStarter.class, PbjStarter.DIR_PARAM, artemisDir );
+      return AnalysisEngineFactory.createEngineDescription( ArtemisStarter.class, ArtemisStarter.DIR_PARAM, artemisDir );
    }
 
 
