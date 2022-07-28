@@ -2,10 +2,8 @@
 #  This piper file just listens to a queue and saves cas information to output files.
 #
 
-// Add this project package.
+// Add this project's packages.
 package org.apache.ctakes.pbj.cr
-
-//Add Package of ArtemisStopper (ae)
 package org.apache.ctakes.pbj.ae
 
 // Get cas from Artemis.
@@ -20,8 +18,11 @@ add pretty.html.HtmlTextWriter SubDirectory=html
 // Save marked text.
 add pretty.plaintext.PrettyTextWriterFit SubDirectory=text
 
-// Add the Finished Logger just to let us know that we have disconnected.
-add util.log.FinishedLogger
+// If your artemis installation is not in your system PATH then you must set ArtemisRoot.  Example:
+//set ArtemisRoot=C:\Spiffy\artemis\apache-artemis-2.19.0-bin\apache-artemis-2.19.0\bin\mybroker
 
-//Place to put ArtemisStopper
-add ArtemisStopper ArtemisRoot=C:\Users\ch229935\Desktop\apache-artemis-2.22.0\bin\mybroker
+// Stop the Artemis Broker
+add ArtemisStopper
+
+// Add the Finished Logger for some run statistics.
+add util.log.FinishedLogger

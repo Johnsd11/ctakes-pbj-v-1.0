@@ -4,7 +4,6 @@ import org.apache.ctakes.core.pipeline.PipeBitInfo;
 import org.apache.ctakes.core.util.external.SystemUtil;
 import org.apache.ctakes.core.util.log.DotLogger;
 import org.apache.log4j.Logger;
-import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
@@ -52,11 +51,11 @@ public class ArtemisStopper extends JCasAnnotator_ImplBase {
     private String _logFile;
 
     static public final String PAUSE_PARAM = "Pause";
-    static public final String PAUSE_DESC = "Pause for some seconds after launching.  Default is 0";
+    static public final String PAUSE_DESC = "Pause for some seconds before stopping.  Default is 0";
     @ConfigurationParameter(
-            name = PAUSE_PARAM,
-            description = PAUSE_DESC,
-            mandatory = false
+          name = PAUSE_PARAM,
+          description = PAUSE_DESC,
+          mandatory = false
     )
     private int _pause = 0;
 
@@ -86,30 +85,30 @@ public class ArtemisStopper extends JCasAnnotator_ImplBase {
 
 
     private void runCommand() throws IOException {
+        if ( _pause > 0 ) {
+            final long pause = _pause * 1000L;
+            LOGGER.info( "Pausing " + _pause + " seconds ..." );
+            try ( DotLogger dotter = new DotLogger() ) {
+                Thread.sleep( pause );
+            } catch ( IOException | InterruptedException multE ) {
+                // do nothing
+            }
+        }
         final SystemUtil.CommandRunner runner
-                = new SystemUtil.CommandRunner( "bin" + File.separatorChar + "artemis stop" );
+              = new SystemUtil.CommandRunner( "bin" + File.separatorChar + "artemis stop" );
         runner.setLogFiles( _logFile, _logFile );
         if ( _artemisRoot != null && !_artemisRoot.isEmpty() ) {
             runner.setDirectory( _artemisRoot );
         }
 
-        LOGGER.info( "Stopping Apache Artemis..." );
+        LOGGER.info( "Stopping Apache Artemis ..." );
         SystemUtil.run( runner );
-        if ( _pause < 1 ) {
-            return;
-        }
-        final long pause = _pause * 1000L;
-        LOGGER.info( "Pausing " + _pause + " seconds ..." );
-        try ( DotLogger dotter = new DotLogger() ) {
-            Thread.sleep( pause );
-        } catch ( IOException | InterruptedException multE ) {
-            // do nothing
-        }
     }
 
     static public AnalysisEngineDescription createEngineDescription( final String artemisDir )
             throws ResourceInitializationException {
-        return AnalysisEngineFactory.createEngineDescription( ArtemisStarter.class, ArtemisStarter.DIR_PARAM, artemisDir );
+        return AnalysisEngineFactory.createEngineDescription( ArtemisStopper.class, ArtemisStopper.DIR_PARAM,
+                                                              artemisDir );
     }
 
 
