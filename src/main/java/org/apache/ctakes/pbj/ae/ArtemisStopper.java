@@ -24,13 +24,11 @@ import java.io.IOException;
         description = "Starts an Apache Artemis broker.",
         role = PipeBitInfo.Role.SPECIAL
 )
-public class ArtemisStopper extends JCasAnnotator_ImplBase {
+public class ArtemisStopper extends ArtemisSuper {
 
     static private final Logger LOGGER = Logger.getLogger( "ArtemisStopper" );
 
 
-    static public final String DIR_PARAM = "ArtemisRoot";
-    static public final String DIR_DESC = "Your Artemis root directory.";
     @ConfigurationParameter(
             name = DIR_PARAM,
             description = DIR_DESC,
@@ -39,9 +37,6 @@ public class ArtemisStopper extends JCasAnnotator_ImplBase {
     private String _artemisRoot;
 
 
-    static public final String LOG_FILE_PARAM = "ArtemisLog";
-    static public final String LOG_FILE_DESC = "File to which Artemis output should be sent. Default is ctakes_artemis"
-            + ".log";
     @ConfigurationParameter(
             name = LOG_FILE_PARAM,
             description = LOG_FILE_DESC,
@@ -50,8 +45,6 @@ public class ArtemisStopper extends JCasAnnotator_ImplBase {
     )
     private String _logFile;
 
-    static public final String PAUSE_PARAM = "Pause";
-    static public final String PAUSE_DESC = "Pause for some seconds before stopping.  Default is 0";
     @ConfigurationParameter(
           name = PAUSE_PARAM,
           description = PAUSE_DESC,
@@ -59,14 +52,6 @@ public class ArtemisStopper extends JCasAnnotator_ImplBase {
     )
     private int _pause = 0;
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
-        // Implementation of the process(..) method is mandatory, even if it does nothing.
-    }
 
     /**
      * {@inheritDoc}
