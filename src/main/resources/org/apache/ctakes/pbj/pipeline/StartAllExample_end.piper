@@ -2,6 +2,9 @@
 #  This piper file just listens to a queue and saves cas information to output files.
 #
 
+// Set the command line parameter -a to accept the directory of the Artemis installation.
+cli ArtemisRoot=a
+
 // Add this project's packages.
 package org.apache.ctakes.pbj.cr
 package org.apache.ctakes.pbj.ae
@@ -17,9 +20,6 @@ add pretty.html.HtmlTextWriter SubDirectory=html
 
 // Save marked text.
 add pretty.plaintext.PrettyTextWriterFit SubDirectory=text
-
-// If your artemis installation is not in your system PATH then you must set ArtemisRoot.  Example:
-//set ArtemisRoot=C:\Spiffy\artemis\apache-artemis-2.19.0-bin\apache-artemis-2.19.0\bin\mybroker
 
 // Stop the Artemis Broker
 add ArtemisStopper

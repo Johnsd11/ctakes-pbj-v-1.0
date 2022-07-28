@@ -29,10 +29,10 @@ add ArtemisStarter Pause=5
 
 //
 // Start another instance of cTAKES, running the pipeline in StartAllExample_end.piper
-// Use the same queue as the python PBJ pipeline.
+// The $ArtemisRoot will substitute the value of this cTAKES pipeline's ArtemisRoot.
 //
 
-add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o output/temp"
+add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o output/temp -a $ArtemisRoot"
 
 
 //
