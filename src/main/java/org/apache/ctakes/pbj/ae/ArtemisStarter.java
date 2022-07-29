@@ -25,31 +25,11 @@ import java.io.IOException;
       description = "Starts an Apache Artemis broker.",
       role = PipeBitInfo.Role.SPECIAL
 )
-public class ArtemisStarter extends ArtemisSuper {
+public class ArtemisStarter extends ArtemisController {
 
    static private final Logger LOGGER = Logger.getLogger( "ArtemisStarter" );
 
-   @ConfigurationParameter(
-         name = DIR_PARAM,
-         description = DIR_DESC,
-         mandatory = false
-   )
-   private String _artemisRoot;
 
-   @ConfigurationParameter(
-         name = LOG_FILE_PARAM,
-         description = LOG_FILE_DESC,
-         defaultValue = "ctakes_artemis_starter.log",
-         mandatory = false
-   )
-   private String _logFile;
-
-   @ConfigurationParameter(
-         name = PAUSE_PARAM,
-         description = PAUSE_DESC,
-         mandatory = false
-   )
-   private int _pause = 0;
 
    /**
     * {@inheritDoc}
@@ -57,6 +37,9 @@ public class ArtemisStarter extends ArtemisSuper {
    @Override
    public void initialize( final UimaContext context ) throws ResourceInitializationException {
       super.initialize( context );
+      if (LOG_FILE_DEFAULT.equals(_logFile)){
+         _logFile = "ctakes_artemis_starter.log";
+      }
       if ( _artemisRoot != null && !_artemisRoot.isEmpty() && !( new File( _artemisRoot ).exists() ) ) {
          LOGGER.warn( "Cannot find Artemis Root Directory " + _artemisRoot );
       }
@@ -65,6 +48,13 @@ public class ArtemisStarter extends ArtemisSuper {
       } catch ( IOException ioE ) {
          throw new ResourceInitializationException( ioE );
       }
+   }
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void process( final JCas jcas ) throws AnalysisEngineProcessException {
+      // Implementation of the process(..) method is mandatory, even if it does nothing.
    }
 
    private void runCommand() throws IOException {

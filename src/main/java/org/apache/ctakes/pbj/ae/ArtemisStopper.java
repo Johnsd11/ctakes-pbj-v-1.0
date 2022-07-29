@@ -4,6 +4,7 @@ import org.apache.ctakes.core.pipeline.PipeBitInfo;
 import org.apache.ctakes.core.util.external.SystemUtil;
 import org.apache.ctakes.core.util.log.DotLogger;
 import org.apache.log4j.Logger;
+import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
@@ -24,33 +25,29 @@ import java.io.IOException;
         description = "Starts an Apache Artemis broker.",
         role = PipeBitInfo.Role.SPECIAL
 )
-public class ArtemisStopper extends ArtemisSuper {
+public class ArtemisStopper extends ArtemisController {
 
     static private final Logger LOGGER = Logger.getLogger( "ArtemisStopper" );
 
 
-    @ConfigurationParameter(
-            name = DIR_PARAM,
-            description = DIR_DESC,
-            mandatory = false
-    )
-    private String _artemisRoot;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initialize( final UimaContext context ) throws ResourceInitializationException {
+        super.initialize( context );
+        if (LOG_FILE_DEFAULT.equals(_logFile)){
+            _logFile = "ctakes_artemis_stopper.log";
+        }
+    }
 
-
-    @ConfigurationParameter(
-            name = LOG_FILE_PARAM,
-            description = LOG_FILE_DESC,
-            defaultValue = "ctakes_artemis_stopper.log",
-            mandatory = false
-    )
-    private String _logFile;
-
-    @ConfigurationParameter(
-          name = PAUSE_PARAM,
-          description = PAUSE_DESC,
-          mandatory = false
-    )
-    private int _pause = 0;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
+        // Implementation of the process(..) method is mandatory, even if it does nothing.
+    }
 
 
     /**
@@ -89,6 +86,7 @@ public class ArtemisStopper extends ArtemisSuper {
         LOGGER.info( "Stopping Apache Artemis ..." );
         SystemUtil.run( runner );
     }
+
 
     static public AnalysisEngineDescription createEngineDescription( final String artemisDir )
             throws ResourceInitializationException {
