@@ -76,8 +76,12 @@ public class ArtemisStopper extends ArtemisController {
                 // do nothing
             }
         }
+
+        LOGGER.info( "ArtemisRoot " + _artemisRoot );
+
         final SystemUtil.CommandRunner runner
               = new SystemUtil.CommandRunner( "bin" + File.separatorChar + "artemis stop" );
+        runner.wait( true );
         runner.setLogFiles( _logFile, _logFile );
         if ( _artemisRoot != null && !_artemisRoot.isEmpty() ) {
             runner.setDirectory( _artemisRoot );
@@ -85,6 +89,7 @@ public class ArtemisStopper extends ArtemisController {
 
         LOGGER.info( "Stopping Apache Artemis ..." );
         SystemUtil.run( runner );
+        LOGGER.info("DONE");
     }
 
 

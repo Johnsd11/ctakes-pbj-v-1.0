@@ -1,0 +1,15 @@
+// Load a simple token processing pipeline from another pipeline file
+load DefaultTokenizerPipeline.piper
+
+// Add non-core annotators
+add ContextDependentTokenizerAnnotator
+// The POSTagger has a -complex- startup, but it can create its own description to handle it
+addDescription POSTagger
+
+//addDescription LvgAnnotator
+//addDescription ThreadSafeLvg
+
+// Default fast dictionary lookup
+load DictionarySubPipe.piper
+
+add FileTreeXmiWriter

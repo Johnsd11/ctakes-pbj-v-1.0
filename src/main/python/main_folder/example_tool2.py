@@ -30,8 +30,8 @@ def main():
 
     word_finder = example_word_finder.ExampleWordFinder(type_system)
 
-    pbj_receiver.start(queue_name=queue_receive_cas, pbj_user_process=word_finder,
-                       type_system=type_system, pbj_sender=pbj_sender)
+    pbj_receiver.start_receiver(queue_name=queue_receive_cas, pbj_user_process=word_finder,
+                                type_system=type_system, pbj_sender=pbj_sender)
 
 
 main()

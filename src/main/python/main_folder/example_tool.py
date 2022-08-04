@@ -25,7 +25,7 @@ def main():
     print(queue_send_cas)
     pbj_sender = PBJSender(queue_send_cas)
     sentence_printer = JCasSentencePrinter(type_system=TypeSystem)
-    pbj_receiver.start(queue_receive_cas, sentence_printer, type_system=TypeSystem, pbj_sender=pbj_sender)
+    pbj_receiver.start_receiver(queue_receive_cas, sentence_printer, type_system=TypeSystem, pbj_sender=pbj_sender)
 
 
 main()

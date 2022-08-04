@@ -30,7 +30,7 @@ def main():
     # pbj_resender = PbjResender(pbj_sender)
     type_system_accessor = TypeSystemAccessor()
     cnlpt_pipe = JCasSentencePrinter(type_system_accessor.get_type_system())
-    pbj_receiver.start(queue_receive_cas, cnlpt_pipe, type_system_accessor.get_type_system(), pbj_sender)
+    pbj_receiver.start_receiver(queue_receive_cas, cnlpt_pipe, type_system_accessor.get_type_system(), pbj_sender)
 
 
 main()

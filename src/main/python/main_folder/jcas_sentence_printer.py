@@ -6,6 +6,7 @@ from ctakes_types import *
 class JCasSentencePrinter(jcas_processor.JCasProcessor):
 
     def __init__(self, type_system):
+        print("arrived at sentence printer")
         pass
 
     def process_jcas(self, cas):

@@ -152,13 +152,16 @@ public class PbjReceiver extends JCasCollectionReader_ImplBase {
     */
    @Override
    public void getNext( final JCas jCas ) throws IOException, CollectionException {
+      LOGGER.info( "Getting Next" );
       if ( _messageText.equals( EMPTY_CAS ) ) {
          new JCasBuilder().setDocText( "" )
                           .rebuild( jCas );
+         LOGGER.info( "Empty Cas" );
          return;
       }
       try ( InputStream textStream = new BufferedInputStream( new ByteArrayInputStream( _messageText.getBytes() ) ) ) {
          XmiCasDeserializer.deserialize( textStream, jCas.getCas() );
+         LOGGER.info("got cas");
          _casCount++;
       } catch ( SAXException e ) {
          throw new CollectionException( e );
