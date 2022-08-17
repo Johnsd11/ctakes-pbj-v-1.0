@@ -1,8 +1,8 @@
 from cassis import *
-import pbj_sender
+import pbj_sender_v2
 from pbj_util import *
 
-sender = pbj_sender.PBJSender('queue/test')
+sender = pbj_sender_v2.PBJSender('queue/test')
 
 
 class XmiToCasHandler:

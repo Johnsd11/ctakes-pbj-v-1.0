@@ -5,11 +5,11 @@ if __name__ == '__main__':
         sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
         from cas_to_xmi_handler import *
         from xmi_to_cas_handler import *
-        from pbj_sender import *
+        from pbj_sender_v2 import *
     else:
         from ..cas_to_xmi_handler import *
         from ..xmi_to_cas_handler import *
-        from ..pbj_sender import *
+        from ..pbj_sender_v2 import *
 
 
 # TAKES CAS -> XMI
@@ -24,7 +24,7 @@ cas = xmi_to_cas_handler.xmi_to_cas("../../../resources/xmi_dir/OBGYN_Hysterecto
 
 # Normally User code would do something with the cas
 
-sender.send_jcas(cas)
+sender.process_jcas(cas, CTAKES_TYPE_SYSTEM)
 
 # Then converts that cas back to XMI
 xmiText = cas_to_xmi_handler.cas_to_xmi(cas)

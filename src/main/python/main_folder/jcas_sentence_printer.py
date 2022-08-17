@@ -5,11 +5,7 @@ from ctakes_types import *
 
 class JCasSentencePrinter(jcas_processor.JCasProcessor):
 
-    def __init__(self, type_system):
-        print("arrived at sentence printer")
-        pass
-
-    def process_jcas(self, cas):
+    def process_jcas(self, cas, typesystem):
         for sentence in cas.select(Sentence):
             print(sentence.get_covered_text())
             for token in cas.select_covered(WordToken, sentence):

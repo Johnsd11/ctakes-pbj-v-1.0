@@ -5,16 +5,13 @@ from ctakes_types import *
 
 class ExampleWordFinder(jcas_processor.JCasProcessor):
 
-    def __init__(self, type_system):
-        self.type_system = type_system
-
-    def process_jcas(self, cas):
+    def process_jcas(self, cas, typesystem):
 
         #  While we could use ct.create_type to create and add types, for each type lookup the cas array is searched.
         #  So it is faster to get the types first and then create instances with ct.add_type
-        anatomy_type = self.type_system.get_type(AnatomicalSiteMention)
-        symptom_type = self.type_system.get_type(SignSymptomMention)
-        procedure_type = self.type_system.get_type(ProcedureMention)
+        anatomy_type = typesystem.get_type(AnatomicalSiteMention)
+        symptom_type = typesystem.get_type(SignSymptomMention)
+        procedure_type = typesystem.get_type(ProcedureMention)
 
         sites = ['breast']
         findings = ['hernia', 'pain', 'migraines', 'allergies']
