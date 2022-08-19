@@ -7,7 +7,7 @@ from main_folder.pbj_util import *
 
 
 # Load the typesystem
-type_system_accessor = TypeSystemAccessor()
+type_system_accessor = TypeSystemAccessor(CTAKES_TYPE_SYSTEM_TESTS)
 type_system_accessor.load_type_system()
 typesystem = type_system_accessor.get_type_system()
 
