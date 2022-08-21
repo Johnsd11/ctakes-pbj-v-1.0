@@ -14,8 +14,7 @@ public final class PbjUtil {
     public static final String DEFAULT_USER = "guest";
     public static final String DEFAULT_PASS = "guest";
 
-    public static final String STOP_MESSAGE = "Your Friendly neighborhood stop message. Just so that this never looks like anything that ctakes would actually read in a note.";
-
+    public static final String STOP_MESSAGE = "Apache cTAKES PBJ Stop Message.";
 
 
 }

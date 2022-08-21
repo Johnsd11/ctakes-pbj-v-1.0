@@ -35,7 +35,6 @@ class PBJSender(jcas_annotator.JCasAnnotator):
         conn.connect(self.username, self.password, wait=True)
         conn.send(self.target_queue, STOP_MESSAGE)
         print("Sending Stop to " + self.target_queue)
-        int = 0
 
     def set_queue(self, queue_name):
         self.target_queue = queue_name

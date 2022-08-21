@@ -7,7 +7,7 @@ DEFAULT_PASS = 'guest'
 CTAKES_TYPE_SYSTEM_TESTS = "../../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
 # CTAKES_TYPE_SYSTEM = "../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
 CTAKES_TYPE_SYSTEM = "ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
-STOP_MESSAGE = "Your Friendly neighborhood stop message. Just so that this never looks like anything that ctakes would actually read in a note."
+STOP_MESSAGE = "Apache cTAKES PBJ Stop Message."
 XMI_INDICATOR = "xmlns:xmi"
 
 

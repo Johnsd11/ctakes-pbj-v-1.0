@@ -16,4 +16,4 @@ class Pipeline:
 
     def collection_process_complete(self):
         for processor in self.annotators:
-            processor.collectionProcessComplete()
+            processor.collection_process_complete()

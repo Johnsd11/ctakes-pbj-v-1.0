@@ -52,8 +52,8 @@ class PbjReceiver(stomp.ConnectionListener):
 
     def stop_receiver(self):
         self.conn.disconnect()
-        exit_event.set()
         self.pipeline.collection_process_complete()
+        exit_event.set()
 
     def waiting_for_message(self):
         while not self.stop:
