@@ -1,11 +1,11 @@
 import create_type as ct
-import jcas_processor
+import jcas_annotator
 from ctakes_types import *
 
 
-class ExampleWordFinder(jcas_processor.JCasProcessor):
+class ExampleWordFinder(jcas_annotator.JCasAnnotator):
 
-    def process_jcas(self, cas, typesystem):
+    def process(self, cas, typesystem):
 
         #  While we could use ct.create_type to create and add types, for each type lookup the cas array is searched.
         #  So it is faster to get the types first and then create instances with ct.add_type

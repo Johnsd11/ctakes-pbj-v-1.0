@@ -1,7 +1,8 @@
-import sys
-from threading import Event
-import stomp
 import time
+from threading import Event
+
+import stomp
+
 from pbj_util import *
 
 exit_event = Event()
@@ -51,8 +52,8 @@ class PbjReceiver(stomp.ConnectionListener):
 
     def stop_receiver(self):
         self.conn.disconnect()
-        #self.pbj_sender.send_stop()
         exit_event.set()
+        self.pipeline.collection_process_complete()
 
     def waiting_for_message(self):
         while not self.stop:
@@ -75,13 +76,10 @@ class PbjReceiver(stomp.ConnectionListener):
                 print("got xmi")
                 # cas = cassis.load_cas_from_xmi(frame.body, typesystem=self.typesystem)
                 cas = cassis.load_cas_from_xmi(frame.body, self.get_typesystem())
-                self.pipeline.run_processors(cas, self.get_typesystem())
+                self.pipeline.process(cas, self.get_typesystem())
             else:
                 print(frame.body)
 
     def on_disconnected(self):
         self.__connect_and_subscribe()
 
-    @staticmethod
-    def main(self):
-        start_receiver()

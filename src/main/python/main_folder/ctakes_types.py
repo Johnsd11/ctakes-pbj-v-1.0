@@ -1,3 +1,8 @@
+#  TODO:   Turn into an enum.
+#  For access you can use Ctakes.WordToken or Ctakes['WordToken'].
+#  The map access style facilitates dynamic use.
+#  See https://docs.python.org/3/library/enum.html
+
 TypeSystem = 'org.apache.ctakes.typesystem.types.TypeSystem'
 WordToken = 'org.apache.ctakes.typesystem.type.syntax.WordToken'
 BaseToken = 'org.apache.ctakes.typesystem.type.syntax.BaseToken'

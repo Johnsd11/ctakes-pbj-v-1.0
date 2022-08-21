@@ -8,6 +8,8 @@ import warnings
 import example_word_finder
 import pbj_receiver_v2
 import pbj_util
+from main_folder.pbj_sender_v2 import PBJSender
+from main_folder.pipeline import Pipeline
 
 warnings.filterwarnings("ignore")
 
@@ -18,9 +20,10 @@ def main():
     queue_receive_cas = 'test/JavaToPython'
     queue_send_cas = 'test/PythonToJava'
 
-    word_finder = example_word_finder.ExampleWordFinder()
-
-    pbj_receiver_v2.start_receiver(word_finder, queue_receive_cas)
+    pipeline = Pipeline()
+    pipeline.add(example_word_finder.ExampleWordFinder())
+    pipeline.add(PBJSender(queue_send_cas))
+    pbj_receiver_v2.start_receiver(pipeline, queue_receive_cas)
 
 
 main()

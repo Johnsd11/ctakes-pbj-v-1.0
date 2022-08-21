@@ -1,11 +1,11 @@
 
-import jcas_processor
+import jcas_annotator
 from ctakes_types import *
 
 
-class JCasSentencePrinter(jcas_processor.JCasProcessor):
+class JCasSentencePrinter(jcas_annotator.JCasAnnotator):
 
-    def process_jcas(self, cas, typesystem):
+    def process(self, cas, typesystem):
         for sentence in cas.select(Sentence):
             print(sentence.get_covered_text())
             for token in cas.select_covered(WordToken, sentence):
