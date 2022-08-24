@@ -1,10 +1,10 @@
 import stomp
 
-import jcas_annotator
+import cas_annotator
 from pbj_util import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS, STOP_MESSAGE
 
 
-class PBJSender(jcas_annotator.JCasAnnotator):
+class PBJSender(cas_annotator.CasAnnotator):
 
     def __init__(self, queue_name, host_name=DEFAULT_HOST, port_name=DEFAULT_PORT, password=DEFAULT_PASS,
                  username=DEFAULT_USER):
@@ -14,7 +14,7 @@ class PBJSender(jcas_annotator.JCasAnnotator):
         self.password = password
         self.username = username
 
-    def process(self, cas, typesystem):
+    def process(self, cas):
         print("Sending to " + self.target_queue + " ...")
         xmi = cas.to_xmi()
         conn = stomp.Connection([(self.target_host, self.target_port)])

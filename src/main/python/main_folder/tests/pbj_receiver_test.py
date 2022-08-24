@@ -2,7 +2,7 @@
 # 2. Print Sentences from any received cas.
 import warnings
 
-from main_folder.jcas_sentence_printer import JCasSentencePrinter
+from main_folder.cas_sentence_printer import CasSentencePrinter
 from main_folder.pbj_receiver_v2 import PbjReceiver
 from main_folder.pipeline import Pipeline
 
@@ -23,5 +23,5 @@ from main_folder.pipeline import Pipeline
 warnings.filterwarnings("ignore")
 
 pipeline = Pipeline()
-pipeline.add(JCasSentencePrinter())
+pipeline.add(CasSentencePrinter())
 receiver = PbjReceiver(pipeline, 'queue/test')

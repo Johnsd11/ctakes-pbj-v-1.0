@@ -14,11 +14,11 @@ XMI_INDICATOR = "xmlns:xmi"
 class TypeSystemAccessor:
 
     def __init__(self, type_system_file=CTAKES_TYPE_SYSTEM):
-        self.typesystem = 0
+        self.typesystem = None
         self.type_system_file = type_system_file
 
     def load_type_system(self):
-        if self.typesystem == 0:
+        if self.typesystem is None:
             with open(self.type_system_file, 'rb') as f:
                 self.typesystem = cassis.load_typesystem(f)
 

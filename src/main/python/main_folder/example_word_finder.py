@@ -1,17 +1,17 @@
+import cas_annotator
 import create_type as ct
-import jcas_annotator
 from ctakes_types import *
 
 
-class ExampleWordFinder(jcas_annotator.JCasAnnotator):
+class ExampleWordFinder(cas_annotator.CasAnnotator):
 
-    def process(self, cas, typesystem):
+    def process(self, cas):
 
         #  While we could use ct.create_type to create and add types, for each type lookup the cas array is searched.
         #  So it is faster to get the types first and then create instances with ct.add_type
-        anatomy_type = typesystem.get_type(AnatomicalSiteMention)
-        symptom_type = typesystem.get_type(SignSymptomMention)
-        procedure_type = typesystem.get_type(ProcedureMention)
+        anatomy_type = cas.typesystem.get_type(AnatomicalSiteMention)
+        symptom_type = cas.typesystem.get_type(SignSymptomMention)
+        procedure_type = cas.typesystem.get_type(ProcedureMention)
 
         sites = ['breast']
         findings = ['hernia', 'pain', 'migraines', 'allergies']

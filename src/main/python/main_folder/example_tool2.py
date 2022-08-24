@@ -15,6 +15,8 @@ warnings.filterwarnings("ignore")
 
 
 def main():
+    #  TODO - create an example that accepts command line parameters.
+    #   e.g. main(argv) getopt("r:s:",["receive=","send="])
     hostname = pbj_util.DEFAULT_HOST
     port = pbj_util.DEFAULT_PORT
     queue_receive_cas = 'test/JavaToPython'
