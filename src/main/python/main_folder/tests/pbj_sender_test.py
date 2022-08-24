@@ -32,6 +32,6 @@ with open("../../../resources/xmi_dir/Peds_RoutBirthNote_1.xmi", 'rb') as f:
 
 # explain whats going on here
 pbj_sender = PBJSender('queue/test')
-pbj_sender.process(cas, typesystem)
+pbj_sender.process(cas)
 pbj_sender.send_stop()
 print("sent")

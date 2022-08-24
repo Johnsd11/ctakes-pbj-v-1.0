@@ -28,7 +28,7 @@ cas = xmi_to_cas_handler.xmi_to_cas("../../../resources/xmi_dir/OBGYN_Hysterecto
 
 # Normally User code would do something with the cas
 
-sender.process(cas, CTAKES_TYPE_SYSTEM)
+sender.process(cas)
 
 # Then converts that cas back to XMI
 xmiText = cas_to_xmi_handler.cas_to_xmi(cas)

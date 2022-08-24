@@ -1,14 +1,12 @@
+from cassis import *
+from cassis.typesystem import TYPE_NAME_FS_ARRAY
 
 import main_folder.add_attribute as am
 from main_folder.ctakes_types import *
-from cassis import *
-from cassis.typesystem import TYPE_NAME_FS_ARRAY
 from main_folder.pbj_util import *
-
 
 # Load the typesystem
 type_system_accessor = TypeSystemAccessor(CTAKES_TYPE_SYSTEM_TESTS)
-type_system_accessor.load_type_system()
 typesystem = type_system_accessor.get_type_system()
 
 # Create the Cas
