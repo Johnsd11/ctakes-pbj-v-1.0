@@ -29,10 +29,11 @@ add ArtemisStarter Pause=5
 
 //
 // Start another instance of cTAKES, running the pipeline in StartAllExample_end.piper
-// The $ArtemisRoot will substitute the value of this cTAKES pipeline's ArtemisRoot.
+// $OutputDirectory will substitute the value of this cTAKES pipeline's value for OutputDirectory.
+// $ArtemisRoot will substitute the value of this cTAKES pipeline's value for ArtemisRoot.
 //
 
-add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o output/temp -a $ArtemisRoot"
+add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o $OutputDirectory -a $ArtemisRoot"
 
 
 //
