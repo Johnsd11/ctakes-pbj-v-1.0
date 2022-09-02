@@ -24,12 +24,11 @@ from ctakes_types import *
 def get_args_to_rel_map(cas):
     args_to_rel = {}
     for bin_text_rel in cas.select(BinaryTextRelation):
-        # thanks to DeepPheAnaforaXMLReader.java
-        # arg 1 is guaranteed to be med
-        # arg 2 - " - sig
+        # As with the medications
+        # arg 1 is guaranteed to be a dose (MedicationMention)
         med_arg = bin_text_rel.arg1.argument
         sig_arg = bin_text_rel.arg2.argument
-        args_to_rel[(med_arg, sig_arg)] = bin_text_rel
+        args_to_rel[tuple(sorted((med_arg, sig_arg)))] = bin_text_rel
     return args_to_rel
 
 
@@ -59,7 +58,8 @@ def get_relex_labels(cas, sentences):
     for sentence in sentences:
         sent_labels = []
         med_mentions = cas.select_covered(MedicationMention, sentence)
-        sig_mentions = cas.select_covered(EntityMention, sentence)
+        # Changed from medications
+        sig_mentions = cas.select_covered(IdentifiedAnnotation, sentence)
         newline_tokens = cas.select_covered(NewlineToken, sentence)
         newline_token_indices = {(item.begin, item.end) for item in newline_tokens}
 
@@ -77,8 +77,10 @@ def get_relex_labels(cas, sentences):
                 base_tokens.append('<cr>')
             curr_token_idx += 1
 
+        med_sig_pairs = map(lambda s: tuple(sorted(s)), product(med_mentions, sig_mentions))
+
         if med_mentions and sig_mentions:
-            for med_sig_pair in product(med_mentions, sig_mentions):
+            for med_sig_pair in med_sig_pairs:
                 if med_sig_pair in args_to_rel.keys():
                     med_sig_rel = args_to_rel[med_sig_pair]
                     label = med_sig_rel.category
@@ -88,7 +90,9 @@ def get_relex_labels(cas, sentences):
                     if med_arg.begin in token_start_position_map and sig_arg.begin in token_start_position_map:
                         med_idx = token_start_position_map[med_arg.begin]
                         sig_idx = token_start_position_map[sig_arg.begin]
-                        sent_labels.append((med_idx, sig_idx, label))
+                        first_idx = min(med_idx, sig_idx)
+                        second_idx = max(med_idx, sig_idx)
+                        sent_labels.append((first_idx, second_idx, label))
         else:
             sent_labels = 'None'
         sent_len = curr_token_idx
@@ -101,50 +105,36 @@ def get_relex_labels(cas, sentences):
 
 class RTDocumentPipeline(cas_annotator.CasAnnotator):
 
-    def initialize(self, type_system):
+    def __init__(self, type_system):
+        self.corpus_max_sent_len = -1
+        self.total_preds = []
+        self.total_labels = []
+        self.type_system = type_system
+        self.taggers = None
+        self.out_models = None
+        self.central_task = None
+
+    def initialize(self):
         AutoConfig.register("cnlpt", CnlpConfig)
         AutoModel.register(CnlpConfig, CnlpModelForClassification)
 
-        self.cases_processed = 0
-        self.dev_size = 21
-        self.corpus_max_sent_len = 0
         self.total_labels = []
         self.total_preds = []
         # Only need taggers for now
         taggers_dict, out_dict = model_dicts(
-            "/home/ch231037/ctakes_pbj_pipeline_dphe_cr/DeepPhe_CR_pipeline_models",
+            "ENTER NAME HERE",
         )
         print("Models loaded")
-        self.type_system = type_system
         self.taggers = taggers_dict
         self.out_models = out_dict
         # Hard-coding for now
-        self.central_task = "dphe_med"
-        self.task_obj_map = {
-            'dosage': (MedicationDosageModifier, MedicationDosage),
-            'duration': (MedicationDurationModifier, MedicationDuration),
-            'form': (MedicationFormModifier, MedicationForm),
-            'freq': (MedicationFrequencyModifier, MedicationFrequency),
-            'route': (MedicationRouteModifier, MedicationRoute),
-            'strength': (MedicationStrengthModifier, MedicationStrength),
-        }
+        self.central_task = "rt_dose"
 
     def process(self, cas):
         raw_sentences = sorted(cas.select(Sentence), key=lambda s: s.begin)
         doc_labels, max_sent_len = get_relex_labels(cas, raw_sentences)
-        FSArray = cas.typesystem.get_type(TYPE_NAME_FS_ARRAY)
-
         if max_sent_len > self.corpus_max_sent_len:
             self.corpus_max_sent_len = max_sent_len
-
-        def get_ctakes_type(ty):
-            return cas.typesystem.get_type(ty)
-
-        def get_ctakes_types(type_pair):
-            return tuple(map(get_ctakes_type, type_pair))
-
-        ctakes_type_map = {task: get_ctakes_types(type_pair) for task, type_pair in self.task_obj_map.items()}
-        modifier_reference_map = {modifier: set() for modifier in list(zip(*ctakes_type_map.values()))[1]}
 
         def cas_clean_sent(sent):
             return ctakes_clean(cas, sent)
@@ -164,63 +154,7 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
 
         print("Predictions obtained")
 
-        aligned_sents_and_data = [cleaned_sentences, sentence_maps, axis_idxs_groups, sig_idxs_groups]
-
-        # for task_name, prediction_tuples in predictions_dict.items():
-        # for sent, sent_pred_bundle, sent_map, axis_idxs, sig_idxs in zip(*aligned_sents_and_data):
         for task_name, prediction_tuples in predictions_dict.items():
-            for sent, sent_map, sent_axis_idxs, sent_sig_idxs in zip(*aligned_sents_and_data):
-                # if self.cases_processed < self.dev_size:
-                # self.total_preds.extend(prediction_tuples)
-                # self.total_labels.extend(doc_labels)
-                # self.cases_processed += 1
-                print("Sentence:")
-                print(sent)
-                print(sent_axis_idxs)
-                print(sent_sig_idxs)
-                tokenized_sent = sent.split()
-                med_type = None
-
-                axis_idx_mention_map = {}
-                sig_idx_mention_map = {}
-
-                for axis_task, axis_offsets in sent_axis_idxs.items():
-                    for axis_offset in axis_offsets:
-                        print(f"Axis reached {axis_task} {axis_offset}")
-                        axis_begin, axis_end = axis_offset
-
-                        print(f"{axis_task} : {tokenized_sent[axis_begin:axis_end + 1]}")
-                        print(f"Local character indices : {sent_map[axis_begin][0], sent_map[axis_end][1]}")
-
-                        medMention = cas.typesystem.get_type(MedicationEventMention)
-                        med_type = medMention(
-                            begin=sent_map[axis_begin][0],
-                            end=sent_map[axis_end][1],
-                        )
-                        axis_idx_mention_map[axis_begin] = med_type
-                        cas.add(med_type)
-
-                for sig_task, sig_offsets in sent_sig_idxs.items():
-                    task_label = sig_task.split('_')[-1]
-                    attr_mod_type, attr_type = ctakes_type_map(task_label)
-                    for sig_offset in sig_offsets:
-                        print(f"Sig reached {sig_task} {sig_offset}")
-                        sig_begin, sig_end = sig_offset
-                        print(f"{sig_task} : {tokenized_sent[sig_begin:sig_end + 1]}")
-                        print(f"Local character indices : {sent_map[sig_begin][0], sent_map[sig_end][1]}")
-
-                        attr_mod = attr_mod_type(
-                            begin=sent_map[sig_begin][0],
-                            end=sent_map[sig_end][1],
-                        )
-
-                        attr = attr_type()
-                        cas.add(attr_mod)
-                        cas.add(attr)
-                        sig_idx_mention_map[sig_begin] = attr_mod
-                        modifier_reference_map[attr_mod_type].add(attr_mod_type)
-                    attr_mods = FSArray(elements=[list(modifier_reference_map[attr_mod_type])])
-
             report = cnlp_compute_metrics(
                 classifier_to_relex[task_name],
                 # Giant relex matrix of the predictions
@@ -241,3 +175,4 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             print(cnlp_processors[task_name]().get_labels())
             for score_type, scores in report.items():
                 print(f"{score_type} : {scores}")
+                
