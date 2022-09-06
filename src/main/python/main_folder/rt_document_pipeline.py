@@ -1,7 +1,6 @@
 from itertools import product
 
 import numpy as np
-from cassis.typesystem import TYPE_NAME_FS_ARRAY
 from cnlpt.CnlpModelForClassification import (
     CnlpModelForClassification,
     CnlpConfig,
@@ -47,7 +46,7 @@ def ctakes_clean(cas, sentence):
             base_tokens.append(base_token.get_covered_text())
             token_map.append((base_token.begin, base_token.end))
         else:
-            base_tokens.append('<cr>')
+            base_tokens.append("<cr>")
     return " ".join(base_tokens), token_map
 
 
@@ -74,27 +73,30 @@ def get_relex_labels(cas, sentences):
                 token_start_position_map[base_token.begin] = curr_token_idx
                 base_tokens.append(base_token.get_covered_text())
             else:
-                base_tokens.append('<cr>')
+                base_tokens.append("<cr>")
             curr_token_idx += 1
 
-        med_sig_pairs = map(lambda s: tuple(sorted(s)), product(med_mentions, sig_mentions))
-
         if med_mentions and sig_mentions:
+            med_sig_pairs = map(
+                lambda s: tuple(sorted(s)), product(med_mentions, sig_mentions)
+            )
+
             for med_sig_pair in med_sig_pairs:
                 if med_sig_pair in args_to_rel.keys():
                     med_sig_rel = args_to_rel[med_sig_pair]
                     label = med_sig_rel.category
-                    # else:
-                    # label = 'None'
                     med_arg, sig_arg = med_sig_pair
-                    if med_arg.begin in token_start_position_map and sig_arg.begin in token_start_position_map:
+                    if (
+                        med_arg.begin in token_start_position_map
+                        and sig_arg.begin in token_start_position_map
+                    ):
                         med_idx = token_start_position_map[med_arg.begin]
                         sig_idx = token_start_position_map[sig_arg.begin]
                         first_idx = min(med_idx, sig_idx)
                         second_idx = max(med_idx, sig_idx)
                         sent_labels.append((first_idx, second_idx, label))
         else:
-            sent_labels = 'None'
+            sent_labels = "None"
         sent_len = curr_token_idx
         if sent_len > max_sent_len:
             max_sent_len = sent_len
@@ -102,9 +104,10 @@ def get_relex_labels(cas, sentences):
         doc_labels.append(sent_labels)
     return doc_labels, max_sent_len
 
+def get_unique_triples(sentence, sentence_labels, axis_offsets, sig_offsets):
+    pass
 
 class RTDocumentPipeline(cas_annotator.CasAnnotator):
-
     def __init__(self, type_system):
         self.corpus_max_sent_len = -1
         self.total_preds = []
@@ -117,10 +120,6 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
     def initialize(self):
         AutoConfig.register("cnlpt", CnlpConfig)
         AutoModel.register(CnlpConfig, CnlpModelForClassification)
-
-        self.total_labels = []
-        self.total_preds = []
-        # Only need taggers for now
         taggers_dict, out_dict = model_dicts(
             "ENTER NAME HERE",
         )
@@ -138,7 +137,10 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
 
         def cas_clean_sent(sent):
             return ctakes_clean(cas, sent)
-        cleaned_sentences, sentence_maps = map(list, zip(*map(cas_clean_sent, raw_sentences)))
+
+        cleaned_sentences, sentence_maps = map(
+            list, zip(*map(cas_clean_sent, raw_sentences))
+        )
         (
             predictions_dict,
             local_relex,
@@ -149,7 +151,7 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             self.taggers,
             self.out_models,
             self.central_task,
-            mode='eval',
+            mode="eval",
         )
 
         print("Predictions obtained")
@@ -159,15 +161,19 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
                 classifier_to_relex[task_name],
                 # Giant relex matrix of the predictions
                 np.array(
-                    [local_relex(sent_preds, max_sent_len) for
-                     sent_preds in prediction_tuples]
+                    [
+                        local_relex(sent_preds, max_sent_len)
+                        for sent_preds in prediction_tuples
+                    ]
                 ),
                 # Giant relex matrix of the ground
                 # truth labels
                 np.array(
-                    [local_relex(sent_labels, max_sent_len) for
-                     sent_labels in doc_labels]
-                )
+                    [
+                        local_relex(sent_labels, max_sent_len)
+                        for sent_labels in doc_labels
+                    ]
+                ),
             )
 
             doc_id = cas.select(DocumentID)[0].documentID
@@ -175,4 +181,3 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             print(cnlp_processors[task_name]().get_labels())
             for score_type, scores in report.items():
                 print(f"{score_type} : {scores}")
-                
