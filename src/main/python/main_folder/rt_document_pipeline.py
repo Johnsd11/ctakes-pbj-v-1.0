@@ -17,6 +17,7 @@ from cnlpt.cnlp_processors import (
     classifier_to_relex,
 )
 from transformers import AutoConfig, AutoModel
+from collections import defaultdict
 
 import cas_annotator
 from ctakes_types import *
@@ -29,7 +30,9 @@ def get_args_to_rel_map(cas):
         # arg 1 is guaranteed to be a dose (MedicationMention)
         med_arg = bin_text_rel.arg1.argument
         sig_arg = bin_text_rel.arg2.argument
-        args_to_rel[tuple(sorted((med_arg, sig_arg)))] = bin_text_rel
+        args_to_rel[
+            tuple(sorted((med_arg, sig_arg), key=lambda s: s.begin))
+        ] = bin_text_rel
     return args_to_rel
 
 
@@ -78,9 +81,31 @@ def get_relex_labels(cas, sentences):
                 base_tokens.append("<cr>")
             curr_token_idx += 1
 
-        if med_mentions and sig_mentions:
+        axis_offset_dict = {
+            "dosage": [
+                (
+                    token_start_position_map[med_mention.begin],
+                    token_start_position_map[med_mention.end],
+                )
+                for med_mention in med_mentions
+            ]
+        }
+        sig_offset_dict = {
+            "signature": [
+                (
+                    token_start_position_map[sig_mention.begin],
+                    token_start_position_map[sig_mention.end],
+                )
+                for sig_mention in sig_mentions
+            ]
+        }
+
+        if not (med_mentions and sig_mentions):
+            sent_labels = "None"
+        else:
             med_sig_pairs = map(
-                lambda s: tuple(sorted(s)), product(med_mentions, sig_mentions)
+                lambda p: tuple(sorted(p, key=lambda s: s.begin)),
+                product(med_mentions, sig_mentions),
             )
 
             for med_sig_pair in med_sig_pairs:
@@ -97,14 +122,11 @@ def get_relex_labels(cas, sentences):
                         first_idx = min(med_idx, sig_idx)
                         second_idx = max(med_idx, sig_idx)
                         sent_labels.append((first_idx, second_idx, label))
-        else:
-            sent_labels = "None"
         sent_len = curr_token_idx
         if sent_len > max_sent_len:
             max_sent_len = sent_len
-        # print(f"{sent_labels} : {' '.join(base_tokens)}")
         doc_labels.append(sent_labels)
-    return doc_labels, max_sent_len
+    return doc_labels, axis_offset_dict, sig_offset_dict, max_sent_len
 
 
 # Make sure you use the right dictionaries for the predicted
@@ -145,6 +167,8 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         self.eval_set_size = -1 if eval_set_size is None else eval_set_size
         self.casses_processed = 0
         self.out_tasks = []
+        self.doc_reports = []
+        self.cas_triple_sets = defaultdict(set)
 
     def initialize(self):
         AutoConfig.register("cnlpt", CnlpConfig)
@@ -159,8 +183,14 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         self.central_task = "rt_dose"
 
     def process(self, cas):
+        doc_id = cas.select(DocumentID)[0].documentID
         raw_sentences = sorted(cas.select(Sentence), key=lambda s: s.begin)
-        doc_labels, max_sent_len = get_relex_labels(cas, raw_sentences)
+        (
+            doc_labels,
+            gold_axis_offset_dict,
+            gold_sig_offset_dict,
+            max_sent_len,
+        ) = get_relex_labels(cas, raw_sentences)
         if max_sent_len > self.corpus_max_sent_len:
             self.corpus_max_sent_len = max_sent_len
 
@@ -196,7 +226,7 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
                 # Giant relex matrix of the predictions
                 np.array(
                     [
-                        local_relex(sent_preds, max_sent_len)
+                        local_relex(sent_preds, max_sent_len, mode="pred")
                         for sent_preds in prediction_tuples
                     ]
                 ),
@@ -204,13 +234,12 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
                 # truth labels
                 np.array(
                     [
-                        local_relex(sent_labels, max_sent_len)
+                        local_relex(sent_labels, max_sent_len, mode="gold")
                         for sent_labels in doc_labels
                     ]
                 ),
             )
 
-            doc_id = cas.select(DocumentID)[0].documentID
             print(f"scores for note {doc_id}")
             print(cnlp_processors[task_name]().get_labels())
             for score_type, scores in report.items():
@@ -222,11 +251,20 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             label_list = task_processor.get_labels()
             final_label_map = {label: i for i, label in enumerate(label_list)}
 
-            def final_label_to_relex(label):
+            def final_label_pred(label):
                 return relex_label_to_matrix(
                     label,
                     final_label_map,
                     self.corpus_max_sent_len,
+                    mode="pred",
+                )
+
+            def final_label_gold(label):
+                return relex_label_to_matrix(
+                    label,
+                    final_label_map,
+                    self.corpus_max_sent_len,
+                    mode="gold",
                 )
 
             report = cnlp_compute_metrics(
@@ -234,12 +272,12 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
                 np.array(
                     [
                         *map(
-                            final_label_to_relex,
+                            final_label_pred,
                             self.total_preds,
                         )
                     ]
                 ),
-                np.array([*map(final_label_to_relex, self.total_labels)]),
+                np.array([*map(final_label_gold, self.total_labels)]),
             )
 
             print("Final scores over all notes")
