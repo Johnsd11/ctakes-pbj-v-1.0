@@ -1,4 +1,5 @@
 from itertools import product
+from functools import reduce
 
 import numpy as np
 from cnlpt.CnlpModelForClassification import (
@@ -8,6 +9,7 @@ from cnlpt.CnlpModelForClassification import (
 from cnlpt.cnlp_pipeline_utils import (
     model_dicts,
     get_predictions,
+    relex_label_to_matrix,
 )
 from cnlpt.cnlp_processors import (
     cnlp_processors,
@@ -104,11 +106,35 @@ def get_relex_labels(cas, sentences):
         doc_labels.append(sent_labels)
     return doc_labels, max_sent_len
 
-def get_unique_triples(sentence, sentence_labels, axis_offsets, sig_offsets):
-    pass
+
+# Make sure you use the right dictionaries for the predicted
+# so we're not conveniently displaying the predictions
+# in terms of the gold entities
+def get_text_triples(cas, text_unit, text_unit_labels, axis_offsets, sig_offsets):
+    def first_idx_to_full(dict_values):
+        return {idx_1: (idx_1, idx_2) for idx_1, idx_2 in dict_values}
+
+    all_offsets_raw = [
+        *map(first_idx_to_full, (*axis_offsets.values(), *sig_offsets.values()))
+    ]
+
+    def dict_reduce(d1, d2):
+        return dict((*d1.items(), *d2.items()))
+
+    all_offsets = reduce(dict_reduce, all_offsets_raw)
+    tok_text_unit = ctakes_tokenize(cas, text_unit)
+
+    def idx2span(t):
+        idx1, idx2, label = t
+        span1 = tok_text_unit[slice(*all_offsets[idx1])]
+        span2 = tok_text_unit[slice(*all_offsets[idx2])]
+        return span1, span2, label
+
+    return [*map(idx2span, text_unit_labels)]
+
 
 class RTDocumentPipeline(cas_annotator.CasAnnotator):
-    def __init__(self, type_system):
+    def __init__(self, type_system, eval_set_size=None):
         self.corpus_max_sent_len = -1
         self.total_preds = []
         self.total_labels = []
@@ -116,6 +142,9 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         self.taggers = None
         self.out_models = None
         self.central_task = None
+        self.eval_set_size = -1 if eval_set_size is None else eval_set_size
+        self.casses_processed = 0
+        self.out_tasks = []
 
     def initialize(self):
         AutoConfig.register("cnlpt", CnlpConfig)
@@ -157,6 +186,11 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         print("Predictions obtained")
 
         for task_name, prediction_tuples in predictions_dict.items():
+            self.out_tasks.append(task_name)
+            if self.casses_processed < self.eval_set_size:
+                self.total_preds.extend(prediction_tuples)
+                self.total_labels.extend(doc_labels)
+                self.casses_processed += 1
             report = cnlp_compute_metrics(
                 classifier_to_relex[task_name],
                 # Giant relex matrix of the predictions
@@ -179,5 +213,36 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             doc_id = cas.select(DocumentID)[0].documentID
             print(f"scores for note {doc_id}")
             print(cnlp_processors[task_name]().get_labels())
+            for score_type, scores in report.items():
+                print(f"{score_type} : {scores}")
+
+    def collection_process_complete(self):
+        for task_name in self.out_tasks:
+            task_processor = cnlp_processors[classifier_to_relex[task_name]]()
+            label_list = task_processor.get_labels()
+            final_label_map = {label: i for i, label in enumerate(label_list)}
+
+            def final_label_to_relex(label):
+                return relex_label_to_matrix(
+                    label,
+                    final_label_map,
+                    self.corpus_max_sent_len,
+                )
+
+            report = cnlp_compute_metrics(
+                classifier_to_relex[task_name],
+                np.array(
+                    [
+                        *map(
+                            final_label_to_relex,
+                            self.total_preds,
+                        )
+                    ]
+                ),
+                np.array([*map(final_label_to_relex, self.total_labels)]),
+            )
+
+            print("Final scores over all notes")
+            print(label_list)
             for score_type, scores in report.items():
                 print(f"{score_type} : {scores}")
