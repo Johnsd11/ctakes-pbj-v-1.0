@@ -1,3 +1,4 @@
+import operator
 from itertools import product
 from functools import reduce
 
@@ -59,6 +60,8 @@ def get_relex_labels(cas, sentences):
     doc_labels = []
     args_to_rel = get_args_to_rel_map(cas)
     max_sent_len = 0
+    axis_offset_dicts = []
+    sig_offset_dicts = []
     for sentence in sentences:
         sent_labels = []
         med_mentions = cas.select_covered(MedicationMention, sentence)
@@ -81,24 +84,28 @@ def get_relex_labels(cas, sentences):
                 base_tokens.append("<cr>")
             curr_token_idx += 1
 
-        axis_offset_dict = {
-            "dosage": [
-                (
-                    token_start_position_map[med_mention.begin],
-                    token_start_position_map[med_mention.end],
-                )
-                for med_mention in med_mentions
-            ]
-        }
-        sig_offset_dict = {
-            "signature": [
-                (
-                    token_start_position_map[sig_mention.begin],
-                    token_start_position_map[sig_mention.end],
-                )
-                for sig_mention in sig_mentions
-            ]
-        }
+        axis_offset_dicts.append(
+            {
+                "dosage": [
+                    (
+                        token_start_position_map[med_mention.begin],
+                        token_start_position_map[med_mention.end],
+                    )
+                    for med_mention in med_mentions
+                ]
+            }
+        )
+        sig_offset_dicts.append(
+            {
+                "signature": [
+                    (
+                        token_start_position_map[sig_mention.begin],
+                        token_start_position_map[sig_mention.end],
+                    )
+                    for sig_mention in sig_mentions
+                ]
+            }
+        )
 
         if not (med_mentions and sig_mentions):
             sent_labels = "None"
@@ -126,7 +133,7 @@ def get_relex_labels(cas, sentences):
         if sent_len > max_sent_len:
             max_sent_len = sent_len
         doc_labels.append(sent_labels)
-    return doc_labels, axis_offset_dict, sig_offset_dict, max_sent_len
+    return doc_labels, axis_offset_dicts, sig_offset_dicts, max_sent_len
 
 
 # Make sure you use the right dictionaries for the predicted
@@ -168,13 +175,15 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         self.casses_processed = 0
         self.out_tasks = []
         self.doc_reports = []
-        self.cas_triple_sets = defaultdict(set)
+        self.gold_cas_triple_sets = defaultdict(set)
+        self.pred_cas_triple_sets = defaultdict(set)
+        self.total_f1 = []
 
     def initialize(self):
         AutoConfig.register("cnlpt", CnlpConfig)
         AutoModel.register(CnlpConfig, CnlpModelForClassification)
         taggers_dict, out_dict = model_dicts(
-            "ENTER NAME HERE",
+            "/home/ch231037/rt_pipeline_models",
         )
         print("Models loaded")
         self.taggers = taggers_dict
@@ -182,17 +191,46 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         # Hard-coding for now
         self.central_task = "rt_dose"
 
+    def populate_triples(
+        self, cas, cas_labels, axis_offset_dicts, sig_offset_dicts, mode="gold"
+    ):
+        doc_id = cas.select(DocumentID)[0].documentID
+        unit_level_cas_data = [
+            sorted(cas.select(Sentence), key=lambda s: s.begin),
+            cas_labels,
+            axis_offset_dicts,
+            sig_offset_dicts,
+        ]
+
+        def get_local_triples(text, labels, axis_offsets, sig_offsets):
+            return get_text_triples(cas, text, labels, axis_offsets, sig_offsets)
+
+        local_triples = set(
+            reduce(
+                lambda l1, l2: (*l1, *l2),
+                map(get_local_triples, zip(*unit_level_cas_data)),
+            )
+        )
+        if mode == "gold":
+            self.gold_cas_triple_sets[doc_id] = local_triples
+        elif mode == "pred":
+            self.pred_cas_triple_sets[doc_id] = local_triples
+
     def process(self, cas):
         doc_id = cas.select(DocumentID)[0].documentID
         raw_sentences = sorted(cas.select(Sentence), key=lambda s: s.begin)
         (
             doc_labels,
-            gold_axis_offset_dict,
-            gold_sig_offset_dict,
+            gold_axis_offset_dicts,
+            gold_sig_offset_dicts,
             max_sent_len,
         ) = get_relex_labels(cas, raw_sentences)
         if max_sent_len > self.corpus_max_sent_len:
             self.corpus_max_sent_len = max_sent_len
+
+        self.populate_triples(
+            cas, doc_labels, gold_axis_offset_dicts, gold_sig_offset_dicts, mode="gold"
+        )
 
         def cas_clean_sent(sent):
             return ctakes_clean(cas, sent)
@@ -216,6 +254,17 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         print("Predictions obtained")
 
         for task_name, prediction_tuples in predictions_dict.items():
+            if not isinstance(self.total_f1, list):
+                self.total_f1 = [0] * len(cnlp_processors[task_name]().get_labels())
+            # Only one out task for now so _currently_ I can
+            # afford to be naive
+            # (by extensionality this might work as a definition of
+            # naivety...)
+
+            self.populate_triples(
+                cas, prediction_tuples, axis_idxs_groups, sig_idxs_groups, mode="pred"
+            )
+
             self.out_tasks.append(task_name)
             if self.casses_processed < self.eval_set_size:
                 self.total_preds.extend(prediction_tuples)
@@ -243,6 +292,10 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             print(f"scores for note {doc_id}")
             print(cnlp_processors[task_name]().get_labels())
             for score_type, scores in report.items():
+                if score_type == "f1":
+                    temp = [*map(operator.add, zip(self.total_f1, scores))]
+                    self.total_f1 = temp
+                    print(f"class averaged f1 : {sum(scores) / len(scores)}")
                 print(f"{score_type} : {scores}")
 
     def collection_process_complete(self):
@@ -283,4 +336,16 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
             print("Final scores over all notes")
             print(label_list)
             for score_type, scores in report.items():
-                print(f"{score_type} : {scores}")
+                if score_type != "f1":
+                    print(f"{score_type} : {scores}")
+                else:
+                    print(
+                        f"class averaged corpus level f1 : {sum(scores) / len(scores)}"
+                    )
+                    print(
+                        f"class averaged (over document averaged) f1 : {sum(self.total_f1) / len(self.total_f1)}"
+                    )
+                    print(f"corpus level f1 by class : {scores}")
+                    print(
+                        f"document averaged f1 by class {[*map(lambda s: s / self.casses_processed, self.total_f1)]}"
+                    )
