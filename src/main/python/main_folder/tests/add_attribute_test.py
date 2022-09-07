@@ -30,4 +30,3 @@ for med_attr in cas.select(MedicationStrength):
     elements = fs_array.elements
     for element in elements:
         print(element.get_covered_text())
-

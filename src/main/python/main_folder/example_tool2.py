@@ -19,8 +19,8 @@ def main():
     #   e.g. main(argv) getopt("r:s:",["receive=","send="])
     hostname = pbj_util.DEFAULT_HOST
     port = pbj_util.DEFAULT_PORT
-    queue_receive_cas = 'test/JavaToPython'
-    queue_send_cas = 'test/PythonToJava'
+    queue_receive_cas = "test/JavaToPython"
+    queue_send_cas = "test/PythonToJava"
 
     pipeline = Pipeline()
     pipeline.add(example_word_finder.ExampleWordFinder())

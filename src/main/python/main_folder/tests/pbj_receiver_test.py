@@ -24,4 +24,4 @@ warnings.filterwarnings("ignore")
 
 pipeline = Pipeline()
 pipeline.add(CasSentencePrinter())
-receiver = PbjReceiver(pipeline, 'queue/test')
+receiver = PbjReceiver(pipeline, "queue/test")

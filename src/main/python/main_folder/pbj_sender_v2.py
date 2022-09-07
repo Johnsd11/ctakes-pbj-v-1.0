@@ -1,13 +1,24 @@
 import stomp
 
 import cas_annotator
-from pbj_util import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS, STOP_MESSAGE
+from pbj_util import (
+    DEFAULT_HOST,
+    DEFAULT_PORT,
+    DEFAULT_USER,
+    DEFAULT_PASS,
+    STOP_MESSAGE,
+)
 
 
 class PBJSender(cas_annotator.CasAnnotator):
-
-    def __init__(self, queue_name, host_name=DEFAULT_HOST, port_name=DEFAULT_PORT, password=DEFAULT_PASS,
-                 username=DEFAULT_USER):
+    def __init__(
+        self,
+        queue_name,
+        host_name=DEFAULT_HOST,
+        port_name=DEFAULT_PORT,
+        password=DEFAULT_PASS,
+        username=DEFAULT_USER,
+    ):
         self.target_queue = queue_name
         self.target_host = host_name
         self.target_port = port_name
@@ -56,4 +67,3 @@ class PBJSender(cas_annotator.CasAnnotator):
 
     def get_username(self):
         return self.username
-

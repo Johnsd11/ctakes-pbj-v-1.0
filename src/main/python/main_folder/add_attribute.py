@@ -25,4 +25,3 @@ def add_attribute(cas, medication_event_mention, mod_name, attr_name, begin, end
 
     # Set Attribute in Medication
     setattr(medication_event_mention, lowercase_attr, attr)
-

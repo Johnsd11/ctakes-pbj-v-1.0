@@ -4,7 +4,6 @@ from ctakes_types import *
 
 
 class ExampleWordFinder(cas_annotator.CasAnnotator):
-
     def process(self, cas):
 
         #  While we could use ct.create_type to create and add types, for each type lookup the cas array is searched.
@@ -13,9 +12,9 @@ class ExampleWordFinder(cas_annotator.CasAnnotator):
         symptom_type = cas.typesystem.get_type(SignSymptomMention)
         procedure_type = cas.typesystem.get_type(ProcedureMention)
 
-        sites = ['breast']
-        findings = ['hernia', 'pain', 'migraines', 'allergies']
-        procedures = ['thyroidectomy', 'exam']
+        sites = ["breast"]
+        findings = ["hernia", "pain", "migraines", "allergies"]
+        procedures = ["thyroidectomy", "exam"]
 
         for segment in cas.select(Segment):
             text = segment.get_covered_text()

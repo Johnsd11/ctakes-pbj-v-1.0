@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class CasAnnotator(ABC):
-
     def initialize(self):
         pass
 

@@ -15,8 +15,8 @@ warnings.filterwarnings("ignore")
 def main():
     hostname = DEFAULT_HOST
     port = DEFAULT_PORT
-    queue_receive_cas = 'test/receiveQueue'
-    queue_send_cas = 'test/sendQueue'
+    queue_receive_cas = "test/receiveQueue"
+    queue_send_cas = "test/sendQueue"
 
     print(hostname)
     print(port)

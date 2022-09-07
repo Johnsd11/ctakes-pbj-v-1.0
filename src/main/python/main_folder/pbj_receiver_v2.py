@@ -15,22 +15,23 @@ def start_receiver(pipeline, queue_name):
 
 
 class PbjReceiver(stomp.ConnectionListener):
-
-    def __init__(self, pipeline, queue_name, host_name=DEFAULT_HOST, port_name=DEFAULT_PORT):
+    def __init__(
+        self, pipeline, queue_name, host_name=DEFAULT_HOST, port_name=DEFAULT_PORT
+    ):
         self.source_queue = queue_name
         self.source_host = host_name
         self.source_port = port_name
         self.pipeline = pipeline
         self.typesystem = None
         self.conn = stomp.Connection([(self.source_host, self.source_port)])
-        self.conn.set_listener('', self)
+        self.conn.set_listener("", self)
         self.stop = False
         self.__connect_and_subscribe()
         self.waiting_for_message()
 
     def __connect_and_subscribe(self):
         self.conn.connect(DEFAULT_USER, DEFAULT_PASS, wait=True)
-        self.conn.subscribe(destination=self.source_queue, id='1', ack='auto')
+        self.conn.subscribe(destination=self.source_queue, id="1", ack="auto")
 
     def set_typesystem(self, typesystem):
         self.typesystem = typesystem
@@ -44,7 +45,7 @@ class PbjReceiver(stomp.ConnectionListener):
 
         return self.typesystem
 
-    def set_host(self, host_name): #IP
+    def set_host(self, host_name):  # IP
         self.source_host = host_name
 
     def set_stop(self, stop):
@@ -82,4 +83,3 @@ class PbjReceiver(stomp.ConnectionListener):
 
     def on_disconnected(self):
         self.__connect_and_subscribe()
-
