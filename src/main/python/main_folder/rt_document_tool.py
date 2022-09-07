@@ -26,11 +26,9 @@ def main():
     pbj_sender = PBJSender(queue_send_cas)
     type_system_accessor = TypeSystemAccessor()
     cnlpt_pipe = RTDocumentPipeline(type_system_accessor.get_type_system())
-    pbj_receiver_v2.start(
-        queue_receive_cas,
+    pbj_receiver_v2.start_receiver(
         cnlpt_pipe,
-        type_system_accessor.get_type_system(),
-        pbj_sender,
+        queue_receive_cas,
     )
 
 

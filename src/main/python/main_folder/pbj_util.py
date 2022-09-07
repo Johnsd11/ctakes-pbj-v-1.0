@@ -5,8 +5,9 @@ DEFAULT_PORT = 61616
 DEFAULT_USER = 'guest'
 DEFAULT_PASS = 'guest'
 CTAKES_TYPE_SYSTEM_TESTS = "../../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
-# CTAKES_TYPE_SYSTEM = "../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
-CTAKES_TYPE_SYSTEM = "ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
+CTAKES_TYPE_SYSTEM = "../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
+# Idk what I'm doing here exactly
+#CTAKES_TYPE_SYSTEM = "ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
 STOP_MESSAGE = "Apache cTAKES PBJ Stop Message."
 XMI_INDICATOR = "xmlns:xmi"
 

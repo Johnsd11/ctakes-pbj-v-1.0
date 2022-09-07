@@ -140,6 +140,12 @@ def get_relex_labels(cas, sentences):
 # so we're not conveniently displaying the predictions
 # in terms of the gold entities
 def get_text_triples(cas, text_unit, text_unit_labels, axis_offsets, sig_offsets):
+    print(text_unit)
+    print(text_unit_labels)
+    print(axis_offsets)
+    print(sig_offsets)
+    text_unit_labels = [] if text_unit_labels == "None" else text_unit_labels
+
     def first_idx_to_full(dict_values):
         return {idx_1: (idx_1, idx_2) for idx_1, idx_2 in dict_values}
 
@@ -154,6 +160,7 @@ def get_text_triples(cas, text_unit, text_unit_labels, axis_offsets, sig_offsets
     tok_text_unit = ctakes_tokenize(cas, text_unit)
 
     def idx2span(t):
+        print(t)
         idx1, idx2, label = t
         span1 = tok_text_unit[slice(*all_offsets[idx1])]
         span2 = tok_text_unit[slice(*all_offsets[idx2])]
@@ -208,7 +215,7 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
         local_triples = set(
             reduce(
                 lambda l1, l2: (*l1, *l2),
-                map(get_local_triples, zip(*unit_level_cas_data)),
+                map(lambda u: get_local_triples(*u), zip(*unit_level_cas_data)),
             )
         )
         if mode == "gold":

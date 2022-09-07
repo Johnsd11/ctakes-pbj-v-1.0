@@ -75,7 +75,8 @@ class PbjReceiver(stomp.ConnectionListener):
             if XMI_INDICATOR in frame.body:
                 print("got xmi")
                 cas = cassis.load_cas_from_xmi(frame.body, self.get_typesystem())
-                self.pipeline.process(cas, self.get_typesystem())
+                # self.pipeline.process(cas, self.get_typesystem())
+                self.pipeline.process(cas)
             else:
                 print(frame.body)
 
