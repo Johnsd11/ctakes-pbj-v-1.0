@@ -70,40 +70,45 @@ def get_relex_labels(cas, sentences):
         newline_tokens = cas.select_covered(NewlineToken, sentence)
         newline_token_indices = {(item.begin, item.end) for item in newline_tokens}
 
-        token_start_position_map = {}
+        token_start_position_map = defaultdict(lambda: -1)
         curr_token_idx = 0
         base_tokens = []
 
         for base_token in ctakes_tokenize(cas, sentence):
             if (base_token.begin, base_token.end) not in newline_token_indices:
-                if base_token.begin in token_start_position_map.keys():
-                    ValueError("Two tokens start with the same index")
+                if base_token.begin in token_start_position_map.keys() or base_token.end in token_start_position_map.keys():
+                    ValueError("Two tokens start or end with the same index")
                 token_start_position_map[base_token.begin] = curr_token_idx
+                token_start_position_map[base_token.end] = curr_token_idx
                 base_tokens.append(base_token.get_covered_text())
             else:
                 base_tokens.append("<cr>")
             curr_token_idx += 1
 
+        print(token_start_position_map)
+        for med_mention, sig_mention in zip(med_mentions, sig_mentions):
+            print(f"med {med_mention.begin} {med_mention.end}")
+            print(f"sig {sig_mention.begin} {sig_mention.end}")
+
+        def unfloor(idx1, idx2):
+            t1, t2 = idx1, idx2
+            if idx2 > -1:
+                t2 = idx2 + 1
+            return t1, t2
+
+
+        def get_indices(t):
+            idx1, idx2 = t
+            return unfloor(token_start_position_map[idx1], token_start_position_map[idx2])
+
         axis_offset_dicts.append(
             {
-                "dosage": [
-                    (
-                        token_start_position_map[med_mention.begin],
-                        token_start_position_map[med_mention.end],
-                    )
-                    for med_mention in med_mentions
-                ]
+                "dosage": [*map(get_indices, med_mentions)]
             }
         )
         sig_offset_dicts.append(
             {
-                "signature": [
-                    (
-                        token_start_position_map[sig_mention.begin],
-                        token_start_position_map[sig_mention.end],
-                    )
-                    for sig_mention in sig_mentions
-                ]
+                "signature": [*map(get_indices, sig_mentions)]
             }
         )
 
@@ -140,10 +145,6 @@ def get_relex_labels(cas, sentences):
 # so we're not conveniently displaying the predictions
 # in terms of the gold entities
 def get_text_triples(cas, text_unit, text_unit_labels, axis_offsets, sig_offsets):
-    print(text_unit)
-    print(text_unit_labels)
-    print(axis_offsets)
-    print(sig_offsets)
     text_unit_labels = [] if text_unit_labels == "None" else text_unit_labels
 
     def first_idx_to_full(dict_values):
@@ -160,7 +161,6 @@ def get_text_triples(cas, text_unit, text_unit_labels, axis_offsets, sig_offsets
     tok_text_unit = ctakes_tokenize(cas, text_unit)
 
     def idx2span(t):
-        print(t)
         idx1, idx2, label = t
         span1 = tok_text_unit[slice(*all_offsets[idx1])]
         span2 = tok_text_unit[slice(*all_offsets[idx2])]
@@ -214,8 +214,8 @@ class RTDocumentPipeline(cas_annotator.CasAnnotator):
 
         local_triples = set(
             reduce(
-                lambda l1, l2: (*l1, *l2),
-                map(lambda u: get_local_triples(*u), zip(*unit_level_cas_data)),
+                lambda l1, l2: [*l1, *l2],
+                [*map(lambda u: get_local_triples(*u), zip(*unit_level_cas_data))],
             )
         )
         if mode == "gold":
