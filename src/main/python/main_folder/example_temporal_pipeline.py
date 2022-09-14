@@ -4,7 +4,7 @@
 # These are the lines that ignore the typesystem errors
 import warnings
 import pbj_receiver_v2
-from pipelinev2 import Pipeline
+from pbj_pipeline import Pipeline
 from pbj_sender_v2 import PBJSender
 import pbj_util
 

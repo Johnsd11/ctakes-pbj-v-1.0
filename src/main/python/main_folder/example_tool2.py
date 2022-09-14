@@ -8,7 +8,7 @@ import warnings
 import pbj_receiver_v2
 from example_word_finder import ExampleWordFinder
 from pbj_sender_v2 import PBJSender
-from pipeline import Pipeline
+from pbj_pipeline import Pipeline
 
 warnings.filterwarnings("ignore")
 

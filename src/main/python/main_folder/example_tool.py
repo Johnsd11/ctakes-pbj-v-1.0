@@ -6,7 +6,7 @@ import warnings
 
 import pbj_receiver_v2
 from cas_sentence_printer import *
-from main_folder.pipeline import Pipeline
+from pbj_pipeline import Pipeline
 from pbj_sender_v2 import *
 
 warnings.filterwarnings("ignore")
