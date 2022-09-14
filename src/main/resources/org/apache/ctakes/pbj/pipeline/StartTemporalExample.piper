@@ -53,7 +53,9 @@ add CommandRunner Command="python ctakes-pbj\src\main\python\main_folder\example
 set WriteBanner=yes
 
 // Load a simple token processing pipeline from another pipeline file
-load DefaultTokenizerPipeline
+// load DefaultTokenizerPipeline
+add SimpleSegmentAnnotator
+add SentenceDetector
 
 // Send CAS to Artemis at the specified queue.  Send stop signal when processing has finished.
 add PbjSender SendQueue=test/JavaToPython SendStop=yes

@@ -20,7 +20,7 @@ def main():
     queue_send_cas = 'test/PythonToJava'
 
     pipeline = Pipeline()
-    pipeline.add(ExampleTemporalRest)
+    pipeline.add(ExampleTemporalRest())
     pipeline.add(PBJSender(queue_send_cas))
     pbj_receiver_v2.start_receiver(pipeline, queue_receive_cas)
 
