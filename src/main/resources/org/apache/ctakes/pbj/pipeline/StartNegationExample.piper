@@ -1,0 +1,63 @@
+#
+#  This is an example piper file that will spin up a complete pbj pipeline.
+#
+#  This piper will start the Apache Artemis broker pointed to by the -a parameter on the command line.
+#  It will pause for 10 seconds to allow artemis to fully launch.
+#
+#  This piper will then launch another instance of Apache cTAKES.
+#  That instance of cTAKES will run the third and final bit of the entire pbj pipeline.
+#
+#  This piper will then launch a python pbj bit of the entire pipeline.
+#
+
+// Add this project's packages.
+package org.apache.ctakes.pbj.ae
+
+
+// Set the command line parameter -a to accept the directory of the Artemis installation.
+cli ArtemisRoot=a
+// Set the command line parameter -d to accept the directory of the Python installation.
+cli CommandDir=d
+
+
+//
+// Start the Artemis broker and pause 10 seconds.
+//
+
+add ArtemisStarter Pause=5
+
+// TODO - for this exaple we can start the rest service automatically
+
+//
+// Start another instance of cTAKES, running the pipeline in StartAllExample_end.piper
+// $OutputDirectory will substitute the value of this cTAKES pipeline's value for OutputDirectory.
+// $ArtemisRoot will substitute the value of this cTAKES pipeline's value for ArtemisRoot.
+//
+
+add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o $OutputDirectory -a $ArtemisRoot"
+
+
+//
+// Start the python bit of the full pipeline.
+// pip the dependency packages if your environment doesn't have them.
+//
+
+add CommandRunner Command="python -m pip install dkpro-cassis" Wait=yes
+add CommandRunner Command="python -m pip install stomp.py" Wait=yes
+add CommandRunner Command="python ctakes-pbj\src\main\python\main_folder\example_negation_pipeline.py" LogFile=negation_py.log
+
+//
+// The pipeline run by this instance of cTAKES.
+//
+
+// Write nice big banners when ctakes starts and finishes.
+set WriteBanner=yes
+
+// Load a simple token processing pipeline from another pipeline file
+load DefaultTokenizerPipeline
+load DictionarySubPipe
+
+
+// Send CAS to Artemis at the specified queue.  Send stop signal when processing has finished.
+add PbjSender SendQueue=test/JavaToPython SendStop=yes
+
