@@ -5,12 +5,10 @@
 # These are the lines that ignore the typesystem errors
 import warnings
 
-import example_word_finder
 import pbj_receiver_v2
-import pbj_util
+from example_word_finder import ExampleWordFinder
 from pbj_sender_v2 import PBJSender
-import pipelinev2
-
+from pipeline import Pipeline
 
 warnings.filterwarnings("ignore")
 
@@ -18,13 +16,13 @@ warnings.filterwarnings("ignore")
 def main():
     #  TODO - create an example that accepts command line parameters.
     #   e.g. main(argv) getopt("r:s:",["receive=","send="])
-    hostname = pbj_util.DEFAULT_HOST
-    port = pbj_util.DEFAULT_PORT
+    # hostname = pbj_util.DEFAULT_HOST
+    # port = pbj_util.DEFAULT_PORT
     queue_receive_cas = 'test/JavaToPython'
     queue_send_cas = 'test/PythonToJava'
 
-    pipeline = pipelinev2.Pipeline()
-    pipeline.add(example_word_finder.ExampleWordFinder())
+    pipeline = Pipeline()
+    pipeline.add(ExampleWordFinder())
     pipeline.add(PBJSender(queue_send_cas))
     pbj_receiver_v2.start_receiver(pipeline, queue_receive_cas)
 
