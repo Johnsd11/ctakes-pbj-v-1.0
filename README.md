@@ -79,7 +79,7 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 
 ## End-to-end PBJ Examples
 ### Temporal Example
-- You first need to get the API side up and running. To do this you need to follow the steps listed here. (https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
+- You first need to get the API side up and running. To do this you need to follow the steps listed [here.](https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
 - Once that is running you need to then create this configuration for StartTemporalExample.piper file.
 (
 -p
