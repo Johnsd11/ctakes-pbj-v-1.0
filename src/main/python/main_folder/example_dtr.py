@@ -25,33 +25,50 @@ class ExampleDtr(cas_annotator.CasAnnotator):
     def process(self, cas):
         print("processing")
         # process_url = 'http://localhost:8000/negation/process'
+        entities = cas.select(EventMention)
 
-        eventMentions = cas.select(EventMention)
-        sites = cas.select(AnatomicalSiteMention)
-        entities = eventMentions + sites
-
-        t = []
+        offsets = []
         for e in entities:
-            t.append([e.begin, e.end])
+            offsets.append([e.begin, e.end])
 
         # eDoc = EntityDocument(doc_text=cas.sofa_string, entities=t)
         # dtr_output = self.dtr_caller(cas.sofa_string, t)
         # print(dtr_output)
         print("calling dtr caller" + str(time.time()))
-        asyncio.run(self.dtr_caller(cas.sofa_string, t))
+        asyncio.run(self.dtr_caller(cas, entities, offsets))
         print("done calling dtr " + str(time.time()))
 
     async def init_caller(self):
         await dtr_rest.startup_event()
 
-
-    async def dtr_caller(self, text, t):
-        eDoc = EntityDocument(doc_text=text, entities=t)
+    async def dtr_caller(self, cas, entities, offsets):
+        event_mention_type = cas.typesystem.get_type(EventMention)
+        event_type = cas.typesystem.get_type(Event)
+        event_properties_type = cas.typesystem.get_type(EventProperties)
+        text = cas.sofa_string
+        eDoc = EntityDocument(doc_text=text, entities=offsets)
 
         #async with sem:
         dtr_output = await dtr_rest.process(eDoc)
         #for future in asyncio.as_completed(dtr_rest.process(eDoc)):
            # dtr_output = await future
-        print("output:" + repr(dtr_output))
-           # print(dtr_output.statuses)
+        i = 0
+        for e in entities:
+            eProps = event_properties_type()
+            eProps.set("docTimeRel", dtr_output.statuses[i])
+
+            eProps.docTimeRel = dtr_output.statuses[i]
+            cas.add(eProps)
+
+            event = event_type()
+            # event.set("properties", eProps)
+            cas.add(event)
+            event.properties = eProps
+
+            e.event = event
+
+            print(e.get_covered_text() + " " + dtr_output.statuses[i])
+            i += 1
+
+    # print(dtr_output.statuses)
         #return dtr_output
