@@ -77,6 +77,28 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 -d "[Destinaiton of your python.exe]" <br/>
 ![step1](https://user-images.githubusercontent.com/34665038/181271047-cf112a93-0d8c-4734-aa21-1281377e6762.png)<br/>
 
+## End-to-end PBJ Examples
+### Temporal Example
+- You first need to get the API side up and running. To do this you need to follow the steps listed here. (https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
+- Once that is running you need to then create this configuration for StartTemporalExample.piper file.
+(
+-p
+org/apache/ctakes/pbj/pipeline/StartTemporalExample
+-i
+(input)
+-a
+(folder where your Artemis broker is)
+-d
+(enviroment) 
+-o
+(output)
+--key
+(UMLS key)
+
+)
+- You should now be able to run that piper file while the API side is running. You can look at the output of running the piper file in "temporal_py.log" as well 
+as the output file that you put into the configuration.
+
   
   
 
