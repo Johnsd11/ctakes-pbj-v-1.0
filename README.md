@@ -115,8 +115,8 @@ org/apache/ctakes/pbj/pipeline/StartNegationExample<br/>
 as the output file that you put into the configuration.<br/>
 
 ### DTR Example
-- You first need to get the API side up and running. To do this you need to follow the steps listed [here.](https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
-- Once that is running you need to then create this configuration for StartDtrExample.piper file.<br/>
+- There is no need to get an API started since we are not using REST for this one.
+- Create this configuration for StartDtrExample.piper file.<br/>
 -p<br/>
 org/apache/ctakes/pbj/pipeline/StartDtrExample<br/>
 -i<br/>
