@@ -81,7 +81,6 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 ### Temporal Example
 - You first need to get the API side up and running. To do this you need to follow the steps listed [here.](https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
 - Once that is running you need to then create this configuration for StartTemporalExample.piper file.<br/>
-![TemporalExample](https://user-images.githubusercontent.com/34665038/191335221-69ba3c5d-f48c-403d-a1f3-32321b91971b.png) <br/>
 -p<br/>
 org/apache/ctakes/pbj/pipeline/StartTemporalExample<br/>
 -i<br/>
@@ -92,11 +91,14 @@ org/apache/ctakes/pbj/pipeline/StartTemporalExample<br/>
 (enviroment) <br/>
 -o<br/>
 (output)<br/>
+--key<br/>
+(UMLS key)<br/>
+- You should now be able to run that piper file while the API side is running. You can look at the output of running the piper file in "temporal_py.log" as well
+as the output file that you put into the configuration.<br/>
 
 ### Negation Example
 - You first need to get the API side up and running. To do this you need to follow the steps listed [here.](https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
 - Once that is running you need to then create this configuration for StartNegationExample.piper file.<br/>
-![image](https://user-images.githubusercontent.com/34665038/191342608-cd43b19c-f971-452e-8f38-6f7111bda6dd.png)<br/>
 -p<br/>
 org/apache/ctakes/pbj/pipeline/StartNegationExample<br/>
 -i<br/>
@@ -113,9 +115,8 @@ org/apache/ctakes/pbj/pipeline/StartNegationExample<br/>
 as the output file that you put into the configuration.<br/>
 
 ### DTR Example
-- There is no need to get an API started since we are not using REST for this one.
-- Create this configuration for StartDtrExample.piper file.<br/>
-![image](https://user-images.githubusercontent.com/34665038/191345362-5da98968-e495-4634-8174-1b449c8c3c50.png)<br/>
+- You first need to get the API side up and running. To do this you need to follow the steps listed [here.](https://github.com/Machine-Learning-for-Medical-Language/cnlp_transformers)
+- Once that is running you need to then create this configuration for StartDtrExample.piper file.<br/>
 -p<br/>
 org/apache/ctakes/pbj/pipeline/StartDtrExample<br/>
 -i<br/>

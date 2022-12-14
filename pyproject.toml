@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ctakes-pbj_chip"
+version = "0.0.1"
+authors = [
+    { name="Computational Health Informatics Program Natural Language Processing Lab", email="Dennis.Johns@childrens.harvard.edu" },
+]
+description = "Example of cnlpt using Python Bridge to Java for Apache cTAKES"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
