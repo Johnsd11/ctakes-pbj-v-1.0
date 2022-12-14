@@ -1,0 +1,39 @@
+Rename Directories.
+https://docs.python-guide.org/writing/structure/
+
+Remedy discrepancy PBJSender vs. PbjReceiver
+
+
+
+
+* Talk about possible learning avenues / materials, have 1-day discussions?
+  - Requirement Gathering
+      https://www.cms-garden.org/de/file/treeswing-illustration
+  - OOD (Object Oriented Design) / OOP (Object Oriented Programming) (and where Functional fits in)
+  - Patterns (and anti-patterns)
+  - Refactoring
+  - Tests
+  - Style (names, etc.)
+  - Thread Safety (& Concurrency)
+  - ?
+
+
++ 3.  Keep the end goal in mind.
++ -- In the end, we want to have:
+   1. A Python API that can be used by a non-programmer.
+   2. A simple startup and shutdown sequence that can be used by a non-sysadmin.
+
+ -- Early in any API project, often before coding, think about overall goals.  We put some of this in the slides.
+   1. What 'work' absolutely needs to be done.
+      - A broad overview is on slide #5.
+   2. What functionality is needed to get that work done.
+      - A general list is on slide #6 and an outline is on slide #7.
+   3. The shortest and easiest path possible to invoke that functionality.
+      - This is based, in part, upon the intended user.  Slide #9.
++ -- Sometimes it helps to have a 'mockup' of the API before you start.
+   - I should have done this with you early on.
+   - I think that doing all of the demo/test code may have gotten you sidetracked and trying to 'adapt'
+     it was the wrong approach.  That is my fault.  I haven't really trained a new developer on a project for 10 years.
+-- A 'mockup' API can be used in tests, which can help keep the end goal in sight.
+
+

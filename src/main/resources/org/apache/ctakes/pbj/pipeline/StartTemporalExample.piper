@@ -43,8 +43,7 @@ add CtakesRunner Pipe="-p org/apache/ctakes/pbj/pipeline/StartAllExample_end -o 
 
 add CommandRunner Command="python -m pip install dkpro-cassis" Wait=yes
 add CommandRunner Command="python -m pip install stomp.py" Wait=yes
-add CommandRunner Command="python ctakes-pbj/src/main/python/main_folder/example_tool2.py" LogFile=pbj_py.log
-
+add CommandRunner Command="python ctakes-pbj\src\main\python\main_folder\example_temporal_pipeline.py" LogFile=temporal_py.log
 
 //
 // The pipeline run by this instance of cTAKES.
@@ -55,6 +54,7 @@ set WriteBanner=yes
 
 // Load a simple token processing pipeline from another pipeline file
 load DefaultTokenizerPipeline
+
 
 // Send CAS to Artemis at the specified queue.  Send stop signal when processing has finished.
 add PbjSender SendQueue=test/JavaToPython SendStop=yes
