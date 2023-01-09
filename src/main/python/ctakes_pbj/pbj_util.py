@@ -10,7 +10,6 @@ CTAKES_TYPE_SYSTEM = "ctakes-type-system/src/main/resources/org/apache/ctakes/ty
 STOP_MESSAGE = "Apache cTAKES PBJ Stop Message."
 XMI_INDICATOR = "xmlns:xmi"
 
-
 class TypeSystemAccessor:
 
     def __init__(self, type_system_file=CTAKES_TYPE_SYSTEM):

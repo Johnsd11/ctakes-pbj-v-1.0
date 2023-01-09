@@ -44,7 +44,7 @@ class PbjReceiver(stomp.ConnectionListener):
 
         return self.typesystem
 
-    def set_host(self, host_name): #IP
+    def set_host(self, host_name):
         self.source_host = host_name
 
     def set_stop(self, stop):
@@ -54,13 +54,6 @@ class PbjReceiver(stomp.ConnectionListener):
         self.conn.disconnect()
         self.pipeline.collection_process_complete()
         exit_event.set()
-
-    #def waiting_for_message(self):
-     #   while not self.stop:
-      #      for x in range(0, 4):
-       #         b = "Waiting for Sender" + "." * x
-        #        print("\r", b, end="")
-         #       time.sleep(1)
 
     def on_message(self, frame):
         # Here we want a check for some trigger like "PBJ_SHUT_DOWN", and then call __stop.
