@@ -6,11 +6,11 @@ DEFAULT_USER = 'guest'
 DEFAULT_PASS = 'guest'
 CTAKES_TYPE_SYSTEM_TESTS = "../../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
 # CTAKES_TYPE_SYSTEM = "../../../../../ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
-CTAKES_TYPE_SYSTEM = "ctakes-type-system/src/main/resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
-STOP_MESSAGE = "Apache cTAKES PBJ Stop Message."
+CTAKES_TYPE_SYSTEM = "resources/org/apache/ctakes/typesystem/types/TypeSystem.xml"
 XMI_INDICATOR = "xmlns:xmi"
 
-class TypeSystemAccessor:
+
+class TypeSystemLoader:
 
     def __init__(self, type_system_file=CTAKES_TYPE_SYSTEM):
         self.typesystem = None

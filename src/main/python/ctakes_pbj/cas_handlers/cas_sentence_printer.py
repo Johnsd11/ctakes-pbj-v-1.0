@@ -2,7 +2,7 @@
 import ctakes_pbj.cas_handlers.cas_annotator
 from ctakes_pbj.pbj_tools.ctakes_types import *
 
-# Prints a list of information on Word Tokens for each Sentence in the cas.
+
 class CasSentencePrinter(ctakes_pbj.cas_handlers.cas_annotator.CasAnnotator):
 
     def process(self, cas):

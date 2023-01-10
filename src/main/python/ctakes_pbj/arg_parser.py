@@ -1,5 +1,5 @@
 import argparse
-from .pbj_util import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS
+from .type_system_loader import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS
 
 
 def get_args():

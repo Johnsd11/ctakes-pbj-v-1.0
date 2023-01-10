@@ -1,6 +1,6 @@
 import stomp
 from .cas_handlers import cas_annotator
-from .pbj_util import STOP_MESSAGE
+from .type_system_loader import STOP_MESSAGE
 
 
 class PBJSender(cas_annotator.CasAnnotator):

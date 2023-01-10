@@ -1,19 +1,20 @@
 import time
 from threading import Event
 import stomp
-from .pbj_util import *
+from .type_system_loader import *
+from pbj_tools.pbj_pipeline import STOP_MESSAGE
 
 
 exit_event = Event()
 
 
 def start_receiver(pipeline, queue_name, host_name, port_name):
-    PbjReceiver(pipeline, queue_name, host_name, port_name)
+    PBJReceiver(pipeline, queue_name, host_name, port_name)
     while not exit_event.is_set():
         exit_event.wait()
 
 
-class PbjReceiver(stomp.ConnectionListener):
+class PBJReceiver(stomp.ConnectionListener):
 
     def __init__(self, pipeline, queue_name, host_name, port_name):
         self.source_queue = queue_name
@@ -37,7 +38,7 @@ class PbjReceiver(stomp.ConnectionListener):
     def get_typesystem(self):
         if self.typesystem is None:
             # Load the typesystem
-            type_system_accessor = TypeSystemAccessor()
+            type_system_accessor = TypeSystemLoader()
             type_system_accessor.load_type_system()
             self.set_typesystem(type_system_accessor.get_type_system())
             print("typesystem print")

@@ -1,6 +1,7 @@
+STOP_MESSAGE = "Apache cTAKES PBJ Stop Message."
 
 
-class Pipeline:
+class PBJPipeline:
 
     def __init__(self):
         self.annotators = []
