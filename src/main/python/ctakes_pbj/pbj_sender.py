@@ -1,12 +1,14 @@
 import stomp
-from .cas_handlers import cas_annotator
-from .type_system_loader import STOP_MESSAGE
+from ctakes_pbj.cas_handlers import cas_annotator
+from ctakes_pbj.pbj_tools.pbj_pipeline import STOP_MESSAGE
+from ctakes_pbj import arg_parser
+args = arg_parser.get_args()
 
 
 class PBJSender(cas_annotator.CasAnnotator):
 
-    def __init__(self, queue_name, host_name, port_name,
-                 password, username):
+    def __init__(self, queue_name=args.send_queue, host_name=args.host_name, port_name=args.port_name,
+                 password=args.password, username=args.username):
 
         self.target_queue = queue_name
         self.target_host = host_name

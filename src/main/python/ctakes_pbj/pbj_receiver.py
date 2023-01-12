@@ -3,12 +3,13 @@ from threading import Event
 import stomp
 from .type_system_loader import *
 from pbj_tools.pbj_pipeline import STOP_MESSAGE
-
+from ctakes_pbj import arg_parser
+args = arg_parser.get_args()
 
 exit_event = Event()
 
 
-def start_receiver(pipeline, queue_name, host_name, port_name):
+def start_receiver(pipeline, queue_name=args.receive_queue, host_name=args.host_name, port_name=args.port_name):
     PBJReceiver(pipeline, queue_name, host_name, port_name)
     while not exit_event.is_set():
         exit_event.wait()
