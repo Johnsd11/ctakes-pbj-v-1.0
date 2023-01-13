@@ -1,5 +1,8 @@
 import argparse
-from .type_system_loader import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USER, DEFAULT_PASS
+DEFAULT_HOST = 'localhost'
+DEFAULT_PORT = 61616
+DEFAULT_USER = 'guest'
+DEFAULT_PASS = 'guest'
 
 
 def get_args():

@@ -1,6 +1,6 @@
 import stomp
 from ctakes_pbj.cas_handlers import cas_annotator
-from ctakes_pbj.pbj_tools.pbj_pipeline import STOP_MESSAGE
+from ctakes_pbj.cas_handlers.pbj_pipeline import STOP_MESSAGE
 from ctakes_pbj import arg_parser
 args = arg_parser.get_args()
 

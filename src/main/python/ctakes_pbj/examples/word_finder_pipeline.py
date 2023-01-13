@@ -8,7 +8,7 @@ import warnings
 from ctakes_pbj.pbj_receiver import start_receiver
 from ctakes_pbj.examples.example_word_finder import ExampleWordFinderAnnotator
 from ctakes_pbj.pbj_sender import PBJSender
-from ctakes_pbj.pbj_tools.pbj_pipeline import PBJPipeline
+from ctakes_pbj.cas_handlers.pbj_pipeline import PBJPipeline
 from ctakes_pbj import arg_parser
 args = arg_parser.get_args()
 

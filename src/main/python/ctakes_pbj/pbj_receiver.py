@@ -2,7 +2,7 @@ import time
 from threading import Event
 import stomp
 from .type_system_loader import *
-from pbj_tools.pbj_pipeline import STOP_MESSAGE
+from ctakes_pbj.cas_handlers.pbj_pipeline import STOP_MESSAGE
 from ctakes_pbj import arg_parser
 args = arg_parser.get_args()
 
