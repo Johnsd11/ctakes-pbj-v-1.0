@@ -35,6 +35,38 @@ def ctakes_clean(cas, sentence):
     return " ".join(base_tokens), token_map
 
 
+def get_casoid_entities(paragraph, casoid):
+    """
+
+    Args:
+      paragraph: paragraph text
+      casoid: paragraph CASoid
+
+    Returns:
+      String of detected dose and attribute mentions in the paragraph,
+      organized by column
+    """
+    # tokenized_paragraph = ctakes_tok(paragraph)
+    # to avoid confusion with ctakes_tokenize
+    tokenized_paragraph = [*filter(None, paragraph.split())]
+    axis_spans = set()
+    sig_spans = set()
+    for w_d_inds, w_dict in casoid.items():
+        for task, indcs_dict in w_dict.items():
+            for indcs, sent_dict in indcs_dict.items():
+                w_inds, dose_indices = w_d_inds
+                sig_indices = indcs
+                s1, s2 = sig_indices
+                window_start, _ = w_inds
+                paragraph_sig = window_start + s1, window_start + s2
+                axis_spans.add((*dose_indices, "rt_dose"))
+                # to avoid redundancy, mention to Guergana and
+                # Danielle when debugging
+                if task != "rt_dose":
+                    sig_spans.add((*paragraph_sig, task))
+    return axis_spans, sig_spans
+
+
 class RTAnnotator(CasAnnotator):
     def initialize(self, cas):
         # Required for loading cnlpt models using Huggingface Transformers
@@ -98,8 +130,17 @@ class RTAnnotator(CasAnnotator):
             *map(classify_casoid, paragraphs_2_raw_casoids)
         ]
 
+        # Will use this to populate relations since this is all the relations after coordination
         casoid_labels = [*map(get_casoid_label, paragraphs_2_classified_cassoids)]
 
-        casoid_proto_entities = enumerate(
-            zip(paragraphs_2_classified_cassoids, casoid_labels)
-        )
+        # one (axis_spans, sig_spans) for each paragraph
+        paragraph_ent_spans = [
+            get_casoid_entities(p_dict, full_labels)
+            for p_dict, full_labels in zip(
+                paragraphs_2_classified_cassoids, casoid_labels
+            )
+        ]
+
+        # TODO -- coordinate relations from casoid_labels
+        # and entities from paragraph_ent_spans to
+        # insert RT mentions into the CAS
