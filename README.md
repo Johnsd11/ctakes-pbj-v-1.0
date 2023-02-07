@@ -65,7 +65,142 @@ https://www.how2shout.com/how-to/download-and-install-maven-on-windows-10-or-11-
 -Once you are in bin again you can run "./artemis run" for MAC or "artemis run" for windows to start the broker<br/>
 -Here are more directions if you need more help or clarification<br/>
 -https://activemq.apache.org/components/artemis/documentation/1.0.0/running-server.html<br/>
-  
+
+
+# Usage
+
+Example piper files can be found in ctakes-examples and example py files can be found in the ctakes-pbj/examples folder<br/>
+
+### Creating a Piper file
+
+This is an example piper file that will spin up a complete pbj pipeline.<br/>
+```
+#  This piper will start the Apache Artemis broker pointed to by the -a parameter on the command line.
+#  It will pause for 5 seconds to allow Artemis to fully launch.
+#
+#  This piper will then launch another instance of Apache cTAKES.
+#  That instance of cTAKES will run the third and final bit of the entire PBJ pipeline.
+#
+#  This piper will then launch a python PBJ bit of the entire pipeline.
+
+```
+We set setJavaHome = no, this is keep things consistent ??????<br/>
+```
+set SetJavaHome=no
+```
+
+The parameters you need to run the piper file are:<br/>
+```
+#
+#  To run this pipeline from the command line, use the parameters:
+#  -p PbjFirstStep
+#  -d {python environment Directory}
+#  -a {Artemis Broker Directory}
+#  -i {Input Document Directory}
+#  -o {Output Directory}
+
+```
+
+Sets up required parameters, starts your Artemis Broker, pips the PBJ project.<br/>
+```
+load PbjStarter
+```
+
+Start another instance of cTAKES, running the pipeline in StartAllExample_end.piper<br/>
+$OutputDirectory will substitute the value of this cTAKES pipeline's value for OutputDirectory.<br/>
+$ArtemisBroker will substitute the value of this cTAKES pipeline's value for ArtemisBroker.<br/>
+```
+add CtakesRunner Pipeline="-p PbjThirdStep -o $OutputDirectory -a $ArtemisBroker"
+```
+
+Declare the python pipeline defining the second step in the total pipeline.<br/>
+```
+set PbjSecondStep=ctakes_pbj.examples.word_finder_pipeline
+```
+
+There is a fixed order to queue specification in python pipelines.<br/>
+The incoming (receiver) queue is named first, the outgoing (sender) queue is named second.<br/>
+```
+add PythonRunner Command="-m $PbjSecondStep JavaToPy PyToJava" LogFile=word_finder_pipeline.log
+```
+
+The pipeline run by this instance of cTAKES. <br/>
+Load a simple token processing pipeline from another pipeline file <br/>
+```
+load DefaultTokenizerPipeline
+```
+
+Send CAS to Artemis at the specified queue.  Send stop signal when processing has finished.<br/>
+```
+add PbjSender SendQueue=JavaToPy SendStop=yes
+```
+### Example py file: WordFinder.py
+
+Start with a function names process<br/>
+```
+def process(self, cas):
+    
+```
+While we could use ct.create_type to create and add types, for each type lookup the cas array is searched.<br/>
+So it is faster to get the types first and then create instances with ct.add_type<br/>
+
+```
+anatomy_type = cas.typesystem.get_type(AnatomicalSiteMention)
+symptom_type = cas.typesystem.get_type(SignSymptomMention)
+procedure_type = cas.typesystem.get_type(ProcedureMention)
+```
+
+Assigning values to sites, findings, and procedures.
+```
+sites = ['breast']
+findings = ['hernia', 'pain', 'migraines', 'allergies']
+procedures = ['thyroidectomy', 'exam']
+```
+
+Not sure what to write here<br/>
+```
+for segment in cas.select(Segment):
+    text = segment.get_covered_text()
+    for word in sites:
+        begin = text.find(word)
+        if begin > -1:
+            print("found Anatomic Site")
+            end = begin + len(word)
+            add_type(cas, anatomy_type, begin, end)
+    for word in findings:
+        begin = text.find(word)
+        if begin > -1:
+            print("found Sign or Symptom")
+            end = begin + len(word)
+            add_type(cas, symptom_type, begin, end)
+    for word in procedures:
+        begin = text.find(word)
+        if begin > -1:
+            print("found Procedure")
+            end = begin + len(word)
+            add_type(cas, procedure_type, begin, end)
+ ``` 
+ 
+ ### Example pipeline file: WordFinderPipeline.py
+ 
+ 
+Start by creating an instance of the pipeline
+```
+pipeline = PBJPipeline()
+```
+Then adding the process(es) 
+```
+pipeline.add(WordFinder())
+...
+```
+Last is adding the sender and receiver while also initializing the pipeline
+```
+pipeline.add(PBJSender())
+pipeline.initialize()
+start_receiver(pipeline)
+```
+
+ 
 # Running an Example
 -You can start running an example by creating an application configuration<br/>
 -You can call it whatever you want, we called it "StartAllExample"<br/>
